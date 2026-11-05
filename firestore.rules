@@ -1,0 +1,105 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && getUserData().role == 'admin';
+    }
+    
+    function isVerifiedProfessor() {
+      return isAuthenticated() && getUserData().role == 'professor';
+    }
+
+    // 1. Users Collection
+    match /users/{userId} {
+      // Anyone authenticated can read user profile summaries
+      allow read: if isAuthenticated();
+      // Only owner can update profile fields, but CANNOT self-elevate role or verification status
+      allow update: if isOwner(userId) && 
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isEmailVerified']);
+      // Only Admin or backend service account can create/delete or change roles
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin();
+    }
+
+    // 2. Single-Device Session Registry
+    match /user_sessions/{sessionId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      // Only backend server routes manage atomic session invalidation
+      allow write: if false;
+    }
+
+    // 3. Academic Catalogue & Documents
+    match /documents/{documentId} {
+      // Approved documents are publicly readable
+      allow read: if resource.data.status == 'approved' || isAdmin() || 
+        (isAuthenticated() && resource.data.contributorId == request.auth.uid);
+      
+      // Contributors can upload new documents in 'pending_review' status only
+      allow create: if isAuthenticated() && 
+        request.resource.data.contributorId == request.auth.uid &&
+        request.resource.data.status == 'pending_review';
+        
+      // Contributors can update non-status metadata; only Admin can approve or reject
+      allow update: if isAdmin() || (
+        isAuthenticated() && 
+        resource.data.contributorId == request.auth.uid &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status', 'professorReviewStatus', 'rating', 'totalSales'])
+      );
+      
+      allow delete: if isAdmin();
+    }
+
+    // 4. Purchases and Entitlements (CRITICAL: Client writes forbidden)
+    match /purchases/{purchaseId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      // Entitlements and purchases can ONLY be created by backend after Razorpay signature verification
+      allow write: if false;
+    }
+
+    match /entitlements/{entitlementId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if false;
+    }
+
+    // 5. Student Reviews (Verified Purchases Only)
+    match /reviews/{reviewId} {
+      allow read: if true;
+      // Creation allowed if authenticated, verified purchase checked by backend
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // 6. Professor Verifications & Reviews
+    match /professor_verifications/{verificationId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    match /professor_reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isVerifiedProfessor() && request.resource.data.professorId == request.auth.uid;
+      allow update, delete: if isAdmin() || (isVerifiedProfessor() && resource.data.professorId == request.auth.uid);
+    }
+
+    // 7. Security Logs & Admin Audits
+    match /security_events/{eventId} {
+      allow read: if isAdmin();
+      allow write: if false; // Append-only by backend security service
+    }
+  }
+}

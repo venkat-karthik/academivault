@@ -1,0 +1,97 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    
+    /* User Color Hunt Palette (#ff933e, #ffcb56, #ffe9a9, #73a5ca) */
+    --palette-orange: #ff933e;
+    --palette-gold: #ffcb56;
+    --palette-cream: #ffe9a9;
+    --palette-blue: #73a5ca;
+    --palette-paper: #fffdf6;
+    --palette-surface: #ffffff;
+    --palette-ink: #1e1915;
+    --palette-ink-muted: #645548;
+    --palette-accent-warm: #ea6510;
+    --palette-accent-blue: #2d6289;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--palette-ink);
+    background-color: var(--palette-paper);
+    background-image: radial-gradient(#ffe9a9 1.5px, transparent 1.5px);
+    background-size: 26px 26px;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes page-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gentle-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-fade-slide-up {
+  animation: fade-slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-page-enter {
+  animation: page-enter 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-gentle-float {
+  animation: gentle-float 4s ease-in-out infinite;
+}
+
+/* DRM protected reader view security rules */
+.drm-protected-surface {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+@media print {
+  .drm-protected-surface, .drm-reader-container {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  body::after {
+    content: "UNAUTHORIZED PRINT ATTEMPT DETECTED. Printing of copyright-protected academic materials is strictly prohibited.";
+    display: block;
+    font-size: 24pt;
+    color: red;
+    text-align: center;
+    padding: 100px 20px;
+  }
+}

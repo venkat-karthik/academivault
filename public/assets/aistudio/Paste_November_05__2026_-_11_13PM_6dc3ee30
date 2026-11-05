@@ -1,0 +1,1240 @@
+# MASTER BUILD PROMPT — SECURE COLLEGE NOTES MARKETPLACE
+
+## 1. YOUR ROLE
+
+Act as a senior full-stack software architect, principal UI/UX designer, cybersecurity engineer, database architect, payment integration specialist and product engineer.
+
+Your task is to design and build a complete, production-oriented, scalable college notes marketplace.
+
+Do not build a simple demonstration, static website, generic dashboard or frontend-only prototype.
+
+Build a functional, full-stack application with:
+- Beautiful and polished frontend.
+- Secure backend.
+- Real authentication.
+- Real database integration.
+- Cloud file storage.
+- Secure payment integration.
+- Protected academic document viewer.
+- Digital rights management.
+- Student ratings and professor reviews.
+- Contributor and administrator dashboards.
+
+Make sound engineering decisions independently while respecting every requirement in this specification.
+
+Do not remove important functionality simply to make development easier.
+
+---
+
+# 2. PRODUCT VISION
+
+Build a digital academic marketplace where students can discover, purchase and securely view college notes, study materials, handwritten notes, assignments, question banks, laboratory records and examination preparation materials.
+
+Contributors can upload and sell their original academic materials.
+
+Students can purchase access to individual documents or academic packages.
+
+Professors with verified identities can review and evaluate academic materials.
+
+The platform must protect intellectual property using a multi-layer digital rights management system.
+
+CORE PRINCIPLE:
+
+Students purchase permission to view academic documents, NOT unrestricted ownership of downloadable PDF files.
+
+The platform should initially target Indian colleges and universities but its architecture must support international expansion.
+
+---
+
+# 3. MANDATORY TECHNOLOGY STACK
+
+Use the following technology stack.
+
+FRONTEND:
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Lucide icons
+- Responsive design
+
+BACKEND:
+- Node.js
+- TypeScript
+- Next.js server-side API routes initially
+- Secure server-side business logic
+- Background processing services where required
+
+AUTHENTICATION:
+- Firebase Authentication
+- Email and password authentication
+- Google sign-in
+- Email verification
+- Password reset
+- Role-based access control
+
+DATABASE:
+- Firebase Cloud Firestore
+
+FILE STORAGE:
+- Cloudinary
+
+PAYMENT GATEWAY:
+- Razorpay
+
+DOCUMENT PROCESSING:
+- PyMuPDF or an equivalent server-side PDF processing solution
+- Secure PDF validation
+- PDF-to-page-image rendering
+- Image optimization
+- Dynamic watermark generation
+
+DEPLOYMENT:
+- Vercel for frontend and supported server routes
+- Google Cloud Run for resource-intensive document processing
+- Google Cloud Tasks or equivalent background job processing where required
+
+MONITORING:
+- Google Cloud logging
+- Firebase monitoring
+- Error tracking
+- Security event logging
+
+Do not replace these selected technologies without explaining a genuine technical blocker.
+
+Never expose API secrets, private keys, Cloudinary secrets, Firebase service account credentials or Razorpay secrets in frontend code.
+
+Use environment variables and server-side configuration.
+
+---
+
+# 4. USER ROLES
+
+Implement four primary roles.
+
+A. STUDENT
+- Register and log in.
+- Browse the marketplace.
+- Search for notes.
+- Purchase documents.
+- View purchased documents.
+- Rate purchased documents.
+- Write verified-purchase reviews.
+- Maintain a wishlist.
+- View purchase history.
+- Manage their active device session.
+- Report copyrighted or inappropriate documents.
+
+B. CONTRIBUTOR
+- Upload original academic documents.
+- Manage uploaded documents.
+- Set document prices.
+- Track sales.
+- View student ratings.
+- View professor reviews.
+- Track earnings.
+- Request withdrawals.
+- Update document versions.
+- View analytics.
+
+C. PROFESSOR / ACADEMIC REVIEWER
+- Apply for professor verification.
+- Submit identity and institutional credentials securely.
+- Receive verification from administrators.
+- Review academic documents.
+- Rate academic accuracy.
+- Evaluate syllabus coverage.
+- Provide detailed academic feedback.
+- Maintain a review history.
+- Disclose potential conflicts of interest.
+
+D. ADMINISTRATOR
+- Manage all users.
+- Manage documents.
+- Verify professors.
+- Moderate uploads.
+- Manage payments.
+- Manage refunds.
+- Manage contributors.
+- Manage copyright complaints.
+- Moderate reviews.
+- Monitor security events.
+- Manage platform settings.
+- View revenue and analytics.
+
+Never trust a role supplied by the frontend.
+
+All role permissions must be validated by the backend.
+
+---
+
+# 5. SINGLE-DEVICE LOGIN SECURITY — CRITICAL
+
+This is a mandatory platform-wide requirement.
+
+ONE ACCOUNT = ONE ACTIVE DEVICE SESSION.
+
+A user must not be able to remain logged in on multiple devices simultaneously.
+
+Expected behavior:
+
+1. A student logs in on Device A.
+2. The backend creates a unique active session.
+3. Device A can access the platform.
+4. The same student attempts to log in on Device B.
+5. The backend creates a new authenticated session and atomically invalidates the previous session.
+6. Device A loses authorization immediately or on its next protected request.
+7. Device B becomes the only authorized active device.
+
+Implement the same behavior for contributors and professors.
+
+Administrators should have separately configurable security policies, with single-device enforcement as the default.
+
+TECHNICAL REQUIREMENTS:
+
+- Create a session registry in Firestore.
+- Each login creates a unique server-generated session ID.
+- Maintain one active session per user.
+- Enforce session replacement using Firestore transactions.
+- Use secure, HTTP-only, Secure and SameSite cookies where appropriate.
+- Never store authentication secrets in localStorage.
+- Verify Firebase ID tokens on the backend.
+- Check active session status on every protected API request.
+- Revoke Firebase refresh tokens when appropriate.
+- Maintain a session version or revocation mechanism.
+- Apply session checks to document viewer requests.
+- Use short-lived document access tokens.
+- Revoke previous sessions when a new login succeeds.
+- Support explicit logout.
+- Support administrator-forced logout.
+- Record login time, session status and security events.
+
+IMPORTANT:
+
+Firebase authentication alone does not implement single-device login.
+
+Implement a backend-controlled session authorization layer.
+
+Do not rely solely on IP addresses, browser user-agent strings or browser fingerprints. These are not reliable device identity mechanisms.
+
+A browser-based platform cannot perfectly identify physical devices or prevent all copied credentials. Make the one-active-session rule enforceable through server-side authorization.
+
+When an old session is invalidated, display:
+
+"Your account was signed in on another device. Please log in again."
+
+Also provide:
+- Last active session information.
+- Login notifications.
+- Suspicious login detection.
+- Session management for administrators.
+
+---
+
+# 6. MARKETPLACE AND ACADEMIC CATALOGUE
+
+Build a complete academic browsing hierarchy.
+
+COLLEGE
+  → UNIVERSITY
+  → DEPARTMENT
+  → BRANCH
+  → ACADEMIC YEAR
+  → SEMESTER
+  → SUBJECT
+  → MODULE
+  → DOCUMENT
+
+Allow administrators to manage colleges and their academic structures.
+
+Support:
+- Engineering colleges.
+- Degree colleges.
+- Universities.
+- Different academic schemes.
+- Different academic years.
+- Multiple branches.
+- Multiple semesters.
+- Multiple subjects.
+- Multiple modules.
+
+DOCUMENT CATEGORIES:
+
+- Handwritten notes
+- Digital notes
+- Question banks
+- Previous question papers
+- Assignments
+- Laboratory records
+- Practical manuals
+- Projects and reports
+- Examination preparation packs
+- Complete subject materials
+
+MARKETPLACE FEATURES:
+
+- Search by document title.
+- Search by college.
+- Search by university.
+- Search by branch.
+- Search by semester.
+- Search by subject.
+- Search by module.
+- Filter by price.
+- Filter by rating.
+- Filter by professor verification.
+- Sort by popularity.
+- Sort by newest.
+- Sort by price.
+- Trending documents.
+- Recommended documents.
+- Recently added documents.
+- Wishlist.
+- Related documents.
+
+---
+
+# 7. DOCUMENT PRODUCT PAGE
+
+Every document must have a detailed product page.
+
+Display:
+
+- Document cover image.
+- Document title.
+- Description.
+- College.
+- University.
+- Branch.
+- Semester.
+- Subject.
+- Module.
+- Academic scheme.
+- Number of pages.
+- Document language.
+- Upload date.
+- Last updated date.
+- Contributor information.
+- Student rating.
+- Number of verified purchases.
+- Professor review status.
+- Academic quality assessment.
+- Price.
+- Free sample preview.
+- Related documents.
+
+Include a prominent Purchase button.
+
+Never expose original file URLs on public product pages.
+
+---
+
+# 8. SECURE PDF VIEWER AND DRM
+
+This is the platform's most important technical component.
+
+Build a custom protected document reader.
+
+The original uploaded PDF must never be directly downloadable by ordinary students.
+
+DOCUMENT PROCESSING PIPELINE:
+
+1. Contributor uploads PDF.
+2. Backend validates file format.
+3. Perform malware scanning.
+4. Check document integrity.
+5. Check file size and page count.
+6. Extract metadata.
+7. Check for duplicates.
+8. Store the original as an authenticated Cloudinary asset.
+9. Process PDF pages using a secure backend worker.
+10. Generate optimized page images.
+11. Store rendered assets with restricted access.
+12. Create document metadata.
+13. Send document for moderation.
+14. Publish only after approval.
+
+ORIGINAL FILE PROTECTION:
+
+- Never use public Cloudinary asset delivery for protected originals.
+- Use authenticated asset delivery.
+- Use signed delivery where appropriate.
+- Keep Cloudinary API secrets on the backend.
+- Never store unrestricted original-file URLs in publicly readable Firestore documents.
+- Restrict transformations and derived asset access.
+- Do not expose Cloudinary upload credentials to students.
+- Do not allow direct access to internal processing files.
+
+CUSTOM READER:
+
+Build a modern PDF-reading experience with:
+
+- Page navigation.
+- Next and previous page.
+- Zoom controls.
+- Fit-to-width.
+- Fullscreen mode.
+- Page number display.
+- Document loading indicator.
+- Bookmark functionality.
+- Reading progress.
+- Responsive desktop and mobile layout.
+
+SECURITY FEATURES:
+
+A. Dynamic watermarking
+
+Every page should have a visible, personalized watermark containing:
+- Student identifier.
+- Masked email address.
+- Transaction reference or purchase identifier.
+- Timestamp or viewing session identifier.
+
+Watermarks should:
+- Be repeated across the page.
+- Use subtle transparency.
+- Appear at multiple positions where appropriate.
+- Make cropping less useful.
+- Be generated or composited through trusted backend processing.
+
+B. Download protection
+
+- No download button.
+- No original PDF endpoint for students.
+- No unrestricted file URL.
+- No direct document export.
+- Restrict copying and text selection where feasible.
+- Do not expose bulk page retrieval APIs.
+
+C. Session protection
+
+- Verify the active login session.
+- Verify document purchase entitlement.
+- Verify the reader session.
+- Use short-lived access tokens.
+- Revalidate authorization.
+- Support access revocation.
+- Limit concurrent reader sessions.
+
+D. Abuse prevention
+
+- Rate-limit page requests.
+- Detect unusually fast page traversal.
+- Detect bulk page scraping.
+- Detect repeated suspicious requests.
+- Detect unusual concurrent access.
+- Temporarily block suspicious activity.
+- Record security events.
+- Notify administrators.
+
+E. Browser security
+
+Use appropriate:
+- Content Security Policy.
+- Secure cookies.
+- CSRF protection.
+- XSS protection.
+- Rate limiting.
+- Authorization middleware.
+- Secure response headers.
+
+IMPORTANT DRM LIMITATION:
+
+Do not claim that browser code can completely prevent screenshots, screen recordings, photographs or all copying.
+
+Do not falsely advertise 100% screenshot prevention.
+
+The platform should implement strong practical DRM, forensic watermarking, controlled delivery and abuse detection.
+
+For stronger capture protection, investigate commercial DRM or managed secure-viewer technologies as an additional layer.
+
+---
+
+# 9. CLOUDINARY INTEGRATION
+
+Use Cloudinary for academic document storage and delivery.
+
+Create separate logical storage categories:
+
+- Original documents.
+- Rendered document pages.
+- Document thumbnails.
+- Cover images.
+- Contributor profile images.
+
+Implement:
+- Secure upload handling.
+- Authenticated assets.
+- Signed access.
+- Image transformations.
+- Optimized delivery.
+- Asset deletion.
+- Version management.
+- Secure replacement of documents.
+
+The original PDF must be private.
+
+Students should access only authorized rendered pages through the protected reader.
+
+Do not expose Cloudinary secrets in frontend code.
+
+---
+
+# 10. RAZORPAY PAYMENT INTEGRATION
+
+Implement a fully functional Razorpay checkout.
+
+PURCHASE FLOW:
+
+1. Student clicks Purchase.
+2. Frontend requests a purchase order from backend.
+3. Backend retrieves the document's actual price from Firestore.
+4. Backend creates Razorpay order.
+5. Frontend opens Razorpay Checkout.
+6. Student completes payment.
+7. Backend verifies Razorpay checkout signature.
+8. Backend receives and validates payment webhooks.
+9. Backend confirms the payment status.
+10. Backend creates the purchase record.
+11. Backend creates the document entitlement.
+12. Student can open the protected reader.
+
+SECURITY:
+
+- Never trust frontend payment status.
+- Never trust frontend price.
+- Never grant access based on a success redirect.
+- Verify payment signatures server-side.
+- Validate webhook signatures.
+- Implement idempotency.
+- Prevent duplicate purchases.
+- Handle payment failures.
+- Handle pending transactions.
+- Handle refunds.
+- Handle disputes.
+- Maintain immutable transaction references.
+
+PAYMENT DASHBOARD:
+
+- Total sales.
+- Successful payments.
+- Failed payments.
+- Pending payments.
+- Refunds.
+- Transaction history.
+- Purchase receipts.
+
+Use Razorpay's supported payment APIs and checkout documentation.
+
+Never invent API keys or pretend that payment processing is live without actual credentials.
+
+---
+
+# 11. STUDENT RATINGS AND REVIEWS
+
+Create a comprehensive student review system.
+
+Only students with a verified purchase should be able to review a document.
+
+RATING CATEGORIES:
+
+1. Content accuracy.
+2. Explanation quality.
+3. Handwriting/readability.
+4. Syllabus coverage.
+5. Examination usefulness.
+6. Overall satisfaction.
+
+Features:
+- Star ratings.
+- Written reviews.
+- Verified purchase badge.
+- Review timestamps.
+- Helpful votes.
+- Report review.
+- Review moderation.
+- Rating distribution.
+- Average rating.
+- Document-specific review history.
+
+Prevent:
+- Fake reviews.
+- Duplicate reviews.
+- Self-reviews.
+- Manipulated ratings.
+- Unauthorized review creation.
+
+Allow reviewers to update their review within defined platform rules.
+
+Associate reviews with a specific document version.
+
+---
+
+# 12. PROFESSOR VERIFICATION AND ACADEMIC REVIEWS
+
+Create a dedicated professor verification system.
+
+PROFESSOR APPLICATION:
+
+- Full name.
+- Institution.
+- Department.
+- Academic designation.
+- Official institutional email.
+- Credentials.
+- Supporting verification documents.
+
+Administrators manually review applications.
+
+Never automatically grant verified professor status merely because a user selects the professor role.
+
+PROFESSOR REVIEW CRITERIA:
+
+- Technical correctness.
+- Academic accuracy.
+- Conceptual explanation.
+- Syllabus alignment.
+- Completeness.
+- Reference quality.
+- Overall academic quality.
+
+Display:
+
+- Verified professor badge.
+- Professor review rating.
+- Written academic feedback.
+- Review date.
+- Reviewed document version.
+
+Allow administrators to suspend or revoke professor verification.
+
+Prevent conflicts of interest and professor self-review.
+
+Clearly distinguish independent academic review from official college endorsement.
+
+---
+
+# 13. CONTRIBUTOR DASHBOARD
+
+Create a dedicated seller dashboard.
+
+Features:
+
+- Upload document.
+- Edit document details.
+- Set pricing.
+- View pending approvals.
+- View approved documents.
+- View rejected documents.
+- Edit document metadata.
+- Upload document revisions.
+- View sales.
+- View revenue.
+- View student reviews.
+- View professor assessments.
+- Track earnings.
+- Request withdrawals.
+- View payout history.
+
+UPLOAD FORM:
+
+- Document title.
+- Description.
+- College.
+- University.
+- Branch.
+- Semester.
+- Subject.
+- Module.
+- Academic scheme.
+- Document category.
+- Language.
+- Page count.
+- Price.
+- Cover image.
+- PDF file.
+- Copyright ownership declaration.
+
+Every uploaded document must pass moderation before publication.
+
+Include copyright infringement reporting and takedown procedures.
+
+---
+
+# 14. ADMINISTRATOR DASHBOARD
+
+Create a comprehensive administrative control panel.
+
+OVERVIEW:
+
+- Total users.
+- Active students.
+- Contributors.
+- Verified professors.
+- Total documents.
+- Pending documents.
+- Published documents.
+- Total purchases.
+- Gross revenue.
+- Platform earnings.
+- Refunds.
+- Monthly growth.
+
+USER MANAGEMENT:
+
+- Search users.
+- View user profiles.
+- Verify accounts.
+- Suspend accounts.
+- Restore accounts.
+- Change permitted roles.
+- Revoke sessions.
+- Review suspicious activity.
+
+DOCUMENT MANAGEMENT:
+
+- View documents.
+- Approve documents.
+- Reject documents.
+- Suspend documents.
+- Delete documents according to retention policy.
+- Review reported documents.
+- Manage categories.
+- Manage academic catalogue.
+
+PROFESSOR MANAGEMENT:
+
+- Review applications.
+- Approve verification.
+- Reject verification.
+- Suspend verification.
+- Review professor activity.
+
+REVIEW MANAGEMENT:
+
+- Investigate fake reviews.
+- Remove policy-violating reviews.
+- Investigate abuse reports.
+- Maintain moderation logs.
+
+PAYMENT MANAGEMENT:
+
+- View transactions.
+- View refunds.
+- Review disputes.
+- View contributor balances.
+- Review payout requests.
+
+SECURITY MANAGEMENT:
+
+- Active sessions.
+- Revoked sessions.
+- Failed logins.
+- Suspicious activity.
+- Document access logs.
+- Rate-limit events.
+- Security alerts.
+
+All administrator actions must be logged.
+
+---
+
+# 15. DATABASE ARCHITECTURE
+
+Use Firebase Cloud Firestore.
+
+Create a well-structured database.
+
+Recommended collections:
+
+users
+colleges
+universities
+departments
+branches
+academic_years
+semesters
+subjects
+modules
+documents
+document_versions
+purchases
+payments
+entitlements
+reader_sessions
+reviews
+professor_reviews
+professor_verifications
+contributors
+earnings
+payouts
+wishlist
+notifications
+reports
+copyright_claims
+access_logs
+security_events
+admin_logs
+platform_settings
+
+For every collection:
+
+- Define the schema.
+- Define field types.
+- Define relationships.
+- Define validation.
+- Define access permissions.
+- Define indexes.
+- Define lifecycle and deletion policies.
+
+Use server timestamps.
+
+Use immutable payment references.
+
+Use Firestore transactions for critical operations.
+
+Prevent unauthorized client-side writes.
+
+Implement restrictive Firestore Security Rules.
+
+Never allow students to create or modify their own purchase entitlements.
+
+Never allow contributors to approve their own documents.
+
+Never allow users to grant themselves administrator or professor privileges.
+
+---
+
+# 16. FRONTEND DESIGN AND USER EXPERIENCE
+
+Create a visually exceptional, premium academic marketplace.
+
+DESIGN DIRECTION:
+
+- Modern SaaS meets premium EdTech.
+- Clean white or light neutral backgrounds.
+- Deep navy or charcoal typography.
+- Blue accent colors.
+- Subtle gradients.
+- Beautiful typography.
+- Spacious layouts.
+- Rounded cards.
+- Elegant shadows.
+- Smooth micro-interactions.
+- Consistent iconography.
+- Clear information hierarchy.
+
+Do not make the interface look like a generic AI-generated template.
+
+Do not overuse gradients, glassmorphism or excessive animations.
+
+Use professional typography and consistent spacing.
+
+DESIGN RESPONSIVENESS:
+
+- Desktop.
+- Laptop.
+- Tablet.
+- Mobile.
+
+Every page must be responsive.
+
+ACCESSIBILITY:
+
+- Keyboard navigation.
+- Proper contrast.
+- Accessible forms.
+- Screen-reader labels.
+- Meaningful error messages.
+
+---
+
+# 17. REQUIRED PAGES
+
+PUBLIC PAGES:
+
+1. Homepage.
+2. Marketplace.
+3. College listing.
+4. Branch listing.
+5. Semester listing.
+6. Subject listing.
+7. Document details.
+8. Login.
+9. Registration.
+10. Forgot password.
+11. About us.
+12. Contact us.
+13. FAQ.
+14. Terms and conditions.
+15. Privacy policy.
+16. Copyright policy.
+
+STUDENT PAGES:
+
+1. Student dashboard.
+2. My purchases.
+3. Protected document reader.
+4. Wishlist.
+5. Purchase history.
+6. My reviews.
+7. Notifications.
+8. Account settings.
+9. Active session information.
+
+CONTRIBUTOR PAGES:
+
+1. Contributor dashboard.
+2. Upload document.
+3. My documents.
+4. Sales analytics.
+5. Earnings.
+6. Withdrawal requests.
+7. Document reviews.
+8. Profile settings.
+
+PROFESSOR PAGES:
+
+1. Professor dashboard.
+2. Verification application.
+3. Verification status.
+4. Review assignments.
+5. Submit academic reviews.
+6. Review history.
+7. Profile settings.
+
+ADMIN PAGES:
+
+1. Admin dashboard.
+2. User management.
+3. Document moderation.
+4. Professor verification.
+5. Review moderation.
+6. Payment management.
+7. Contributor management.
+8. Payout management.
+9. Copyright reports.
+10. Security monitoring.
+11. Analytics.
+12. Platform configuration.
+
+---
+
+# 18. BUSINESS MODEL
+
+Support individual document purchases and bundles.
+
+Suggested initial pricing configuration:
+
+- Individual notes: ₹29–₹49.
+- Module packages: ₹49–₹79.
+- Complete subject packages: ₹99–₹149.
+- Semester packages: ₹149–₹249.
+- Premium examination packages: ₹99–₹199.
+- Branch packages: ₹399–₹599.
+
+These prices must be editable by administrators.
+
+Suggested contributor revenue share:
+
+- Contributor: 70%.
+- Platform: 30%.
+
+Make commission rates configurable.
+
+Account for payment gateway fees, refunds, applicable taxes and payout costs.
+
+Do not implement automatic payouts without the required verification and financial controls.
+
+---
+
+# 19. ADDITIONAL PRODUCT FEATURES
+
+Prepare the architecture to support future capabilities:
+
+- AI-powered document search.
+- AI study assistant.
+- Syllabus coverage tracker.
+- Academic recommendations.
+- Contributor leaderboard.
+- Student learning analytics.
+- Document version notifications.
+- Semester bundles.
+- College-specific marketplaces.
+- Referral system.
+- Discount coupons.
+- Promotional campaigns.
+- Multi-language support.
+
+Do not allow AI features to access documents without verifying the student's entitlement and applicable content-processing permissions.
+
+---
+
+# 20. SECURITY REQUIREMENTS
+
+Implement security as a first-class requirement.
+
+Protect against:
+
+- Broken access control.
+- IDOR vulnerabilities.
+- SQL/NoSQL injection.
+- Cross-site scripting.
+- Cross-site request forgery.
+- Session hijacking.
+- Credential theft.
+- Payment forgery.
+- Webhook replay.
+- Unauthorized document access.
+- API abuse.
+- Bulk scraping.
+- File upload attacks.
+- Privilege escalation.
+- Unauthorized administrative access.
+
+Implement:
+
+- Server-side authorization.
+- Input validation.
+- Output sanitization.
+- Secure cookies.
+- Rate limiting.
+- CSRF protection.
+- Content Security Policy.
+- Firebase token verification.
+- Session revocation.
+- Firestore Security Rules.
+- Secure environment configuration.
+- Audit logging.
+- Backup and recovery procedures.
+
+Do not assume that hiding a frontend component is security.
+
+Every sensitive operation must be protected at the backend.
+
+---
+
+# 21. DEVELOPMENT METHODOLOGY
+
+Follow this order.
+
+PHASE 1 — ARCHITECTURE
+
+- Review the requirements.
+- Design the complete application architecture.
+- Define database schemas.
+- Define API contracts.
+- Define authentication and session management.
+- Define payment workflow.
+- Define DRM architecture.
+- Define user journeys.
+
+PHASE 2 — PROJECT FOUNDATION
+
+- Initialize the application.
+- Set up TypeScript.
+- Configure Tailwind.
+- Configure shadcn/ui.
+- Configure Firebase.
+- Create environment configuration.
+- Create reusable UI components.
+
+PHASE 3 — FRONTEND
+
+Build all required pages and dashboards.
+
+Create a consistent design system.
+
+Use realistic sample data only for development previews.
+
+Clearly distinguish demo data from production records.
+
+PHASE 4 — BACKEND
+
+Implement:
+
+- Authentication middleware.
+- Role authorization.
+- Single-device sessions.
+- Database operations.
+- Upload APIs.
+- Document moderation.
+- Payment APIs.
+- Review APIs.
+- Entitlement APIs.
+- Reader authorization.
+- Administrative APIs.
+
+PHASE 5 — INTEGRATIONS
+
+Integrate:
+
+- Firebase Authentication.
+- Cloud Firestore.
+- Cloudinary.
+- Razorpay.
+
+PHASE 6 — DRM
+
+Build:
+
+- PDF processing.
+- Authenticated storage.
+- Page rendering.
+- Dynamic watermarking.
+- Protected document delivery.
+- Session-based reader access.
+- Abuse monitoring.
+
+PHASE 7 — TESTING
+
+Test every major user journey.
+
+Test security boundaries.
+
+Test failed payments.
+
+Test simultaneous login attempts.
+
+Test revoked sessions.
+
+Test unauthorized document access.
+
+Test document upload and moderation.
+
+Test professor verification.
+
+Test review permissions.
+
+PHASE 8 — PRODUCTION READINESS
+
+- Remove mock integrations.
+- Configure production environment variables.
+- Configure Firestore rules.
+- Configure Cloudinary security.
+- Configure Razorpay webhooks.
+- Configure monitoring.
+- Configure backups.
+- Verify deployment.
+- Perform security testing.
+
+---
+
+# 22. STRICT IMPLEMENTATION RULES
+
+1. Build real functionality, not decorative buttons.
+2. Never invent successful API responses.
+3. Never pretend a payment was completed.
+4. Never use fake authentication in production flows.
+5. Never expose private keys.
+6. Never grant access based only on frontend state.
+7. Never expose original PDFs publicly.
+8. Never implement fake professor verification.
+9. Never allow users to modify their own roles.
+10. Never allow multiple active account sessions.
+11. Never use unrestricted document URLs.
+12. Never use mock data as the final database.
+13. Never silently skip security requirements.
+14. Never create placeholder pages for critical functionality.
+15. Do not sacrifice backend security for frontend convenience.
+
+If credentials are missing, build the integration using environment variables and provide a clear setup guide.
+
+If an external service requires configuration, explain exactly what the developer must configure.
+
+If a requested capability cannot be guaranteed technically, explain the limitation and implement the strongest practical alternative.
+
+---
+
+# 23. EXPECTED DELIVERABLES
+
+Deliver the following:
+
+1. Complete application source code.
+2. Professional responsive frontend.
+3. Backend implementation.
+4. Firestore collection schemas.
+5. Firestore Security Rules.
+6. Firebase authentication integration.
+7. Single-device session architecture.
+8. Cloudinary integration.
+9. Razorpay integration.
+10. Protected document viewer.
+11. DRM and watermarking implementation.
+12. Student rating system.
+13. Professor verification and reviews.
+14. Contributor dashboard.
+15. Admin dashboard.
+16. API documentation.
+17. Environment variable example file.
+18. Installation instructions.
+19. Deployment instructions.
+20. Security testing checklist.
+21. End-to-end test cases.
+
+---
+
+# 24. ACCEPTANCE CRITERIA
+
+The product is not considered complete until:
+
+- A student can register and log in.
+- A student cannot maintain multiple active device sessions.
+- A new login invalidates the old session.
+- Students can browse the marketplace.
+- Contributors can upload documents.
+- Administrators can approve documents.
+- Students can purchase documents through Razorpay.
+- Payment verification happens on the backend.
+- A successful payment creates an entitlement.
+- A failed payment does not create an entitlement.
+- Unpurchased documents cannot be viewed.
+- Original PDFs are not publicly accessible.
+- Authorized students can read watermarked pages.
+- Revoked sessions cannot continue reading.
+- Students can rate purchased documents.
+- Professors can apply for verification.
+- Verified professors can submit academic reviews.
+- Administrators can manage all important platform functions.
+- Security tests pass.
+
+---
+
+# 25. FINAL INSTRUCTION
+
+Start by inspecting the available Google AI Studio development environment and determining the supported implementation capabilities.
+
+First establish the project structure and architecture.
+
+Then implement the application incrementally, maintaining working functionality throughout development.
+
+Do not generate a giant collection of disconnected UI components.
+
+Build coherent, integrated modules.
+
+Prioritize the following in order:
+
+1. Authentication and single-device login.
+2. Academic marketplace.
+3. Database and backend.
+4. Cloudinary storage.
+5. Razorpay payments.
+6. Secure document processing and DRM.
+7. Student ratings.
+8. Professor verification and reviews.
+9. Contributor dashboard.
+10. Administrator dashboard.
+
+At the end of each phase:
+- Explain what has been implemented.
+- Identify what works.
+- Identify remaining work.
+- Report any security limitations.
+- Run appropriate tests.
+
+Create a professional, production-oriented product with clean architecture, maintainable code and exceptional UI/UX.
+
+The ultimate objective is to build a trusted academic marketplace that protects creators' intellectual property while providing students with a convenient and reliable way to access quality study materials.
+
+BEGIN WITH ARCHITECTURE AND PROJECT INITIALIZATION.
