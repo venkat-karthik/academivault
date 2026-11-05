@@ -13,7 +13,6 @@ import { ProfessorPortal } from './components/dashboard/ProfessorPortal';
 import { AdminDashboard } from './components/dashboard/AdminDashboard';
 import { DrmExplanationView } from './components/common/DrmExplanationView';
 import { CollegesListingView } from './components/common/CollegesListingView';
-import { StudyAmbientBar } from './components/common/StudyAmbientBar';
 import { AcademicDocument } from './types';
 
 function MainApp() {
@@ -92,9 +91,6 @@ function MainApp() {
           {renderCurrentView()}
         </div>
       </main>
-
-      {/* Floating Study Ambience Bar (Lo-fi/Rain/Cafe + Pomodoro) */}
-      <StudyAmbientBar />
 
       {/* Institutional Footer */}
       <Footer />

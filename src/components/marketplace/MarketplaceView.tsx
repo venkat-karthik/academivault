@@ -226,6 +226,23 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({
         </div>
       </div>
 
+      {/* Catalogue Header */}
+      <div className="flex items-center justify-between pb-2 border-b border-[#ffe9a9]">
+        <div className="flex items-center gap-2.5">
+          <h2 className="text-sm sm:text-base font-bold text-[#1e1915]">
+            Accredited Course Catalog
+          </h2>
+          {!loading && (
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#ffe9a9] text-[#ea6510] font-mono font-semibold border border-[#ffcb56]">
+              {documents.length} verified {documents.length === 1 ? 'pack' : 'packs'}
+            </span>
+          )}
+        </div>
+        <p className="text-[11px] text-[#645548] hidden sm:block font-medium">
+          DRM-Protected &amp; Watermarked
+        </p>
+      </div>
+
       {/* Document Grid */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
