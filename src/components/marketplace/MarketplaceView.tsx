@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AcademicDocument, College } from '../../types';
 import { api } from '../../services/api';
 import { DocumentCard } from './DocumentCard';
-import { Search, ShieldCheck, BookOpen, Sparkles } from 'lucide-react';
+import { Search, ShieldCheck, BookOpen } from 'lucide-react';
 
 interface MarketplaceViewProps {
   onSelectDocument: (doc: AcademicDocument) => void;
@@ -77,112 +77,54 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto animate-fade-slide-up">
-      {/* Warm Aesthetic Student Hero with Cozy Desk Image */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#ffe9a9]/50 via-[#fffdf6] to-[#ffcb56]/20 border border-[#ffe9a9] shadow-xs">
-        {/* Soft background ambient gradient bubbles */}
-        <div className="absolute top-0 right-1/4 w-96 h-96 rounded-full bg-gradient-to-bl from-[#ff933e]/25 to-[#ffcb56]/25 blur-3xl pointer-events-none -mr-16 -mt-16" />
-        <div className="absolute bottom-0 left-1/4 w-80 h-80 rounded-full bg-[#73a5ca]/15 blur-2xl pointer-events-none" />
-
+      {/* Classic Scholarly Hero Banner */}
+      <div className="relative overflow-hidden rounded-3xl bg-[#fffdf6] border border-[#ffe9a9] shadow-xs">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-6 sm:p-10 relative z-10">
-          {/* Left Column: Headline, Copy, Search */}
+          {/* Left Column: Scholarly Headline, Metadata, Search */}
           <div className="lg:col-span-7 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ffe9a9] border border-[#ffcb56] text-[#ea6510] text-[11px] font-bold tracking-wide uppercase shadow-2xs">
-              <Sparkles className="w-3.5 h-3.5 text-[#ea6510]" />
-              <span>Cozy Study Space & Verified Notes</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-[#ffe9a9]/60 border border-[#ffcb56] text-[#ea6510] text-[11px] font-bold tracking-wider uppercase">
+              <BookOpen className="w-3.5 h-3.5 text-[#ea6510]" />
+              <span>National Higher Education Repository</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#1e1915] text-balance leading-tight">
-              Curated College Notes for Peaceful Learning.
+              Curated Academic Courseware & Verified Notes
             </h1>
 
             <p className="text-xs sm:text-sm text-[#645548] leading-relaxed max-w-xl">
-              Syllabus-aligned study materials prepared by university toppers and evaluated by accredited professors. Read comfortably on our warm, eye-friendly protected viewer.
+              Syllabus-aligned lecture notes, handwritten derivations, and solved university examination archives. Fully authenticated by accredited faculty auditors and accessible via protected reader mode.
             </p>
 
-            {/* Search Input with Warm Glow */}
-            <div className="relative max-w-lg group pt-1">
-              <Search className="absolute left-4 top-4.5 w-4 h-4 text-[#ea6510]/70 group-focus-within:text-[#ea6510] transition-colors pointer-events-none" />
+            {/* Classic Professional Search Bar */}
+            <div className="relative max-w-xl pt-1">
+              <Search className="absolute left-4 top-4.5 w-4 h-4 text-[#645548]/70 pointer-events-none" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by subject, title, university, or professor..."
-                className="w-full pl-11 pr-4 py-3 rounded-2xl bg-white/95 text-[#1e1915] placeholder:text-[#645548]/50 border border-[#ffe9a9] focus:border-[#ff933e] focus:bg-white focus:outline-none focus:ring-3 focus:ring-[#ff933e]/30 text-xs sm:text-sm font-medium transition-all shadow-sm"
+                placeholder="Search by course code, subject name, university, or author..."
+                className="w-full pl-11 pr-4 py-3 rounded-xl bg-white text-[#1e1915] placeholder:text-[#645548]/50 border border-[#ffe9a9] focus:border-[#ea6510] focus:outline-none focus:ring-2 focus:ring-[#ea6510]/20 text-xs sm:text-sm font-medium transition-all shadow-2xs"
               />
             </div>
           </div>
 
-          {/* Right Column: Cozy Study Desk Atmosphere Picture */}
+          {/* Right Column: Prestigious University Reading Hall */}
           <div className="lg:col-span-5">
-            <div className="relative group rounded-3xl overflow-hidden border border-[#ffe9a9] shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+            <div className="relative rounded-2xl overflow-hidden border border-[#ffe9a9] shadow-sm">
               <img
-                src="/src/assets/images/hero_cozy_study_desk_1793904180995.jpg"
-                alt="Cozy student study desk with notes, warm lamp, and warm cup of coffee"
-                className="w-full h-64 sm:h-72 object-cover object-center group-hover:scale-103 transition-transform duration-500"
+                src="/src/assets/images/library_aesthetic_reading_1793904179717.jpg"
+                alt="University academic reading hall"
+                className="w-full h-56 sm:h-64 object-cover object-center"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1e1915]/80 via-transparent to-transparent flex flex-col justify-end p-5 text-white">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-[#ffe9a9] font-semibold">
-                  Study Sanctuary
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1e1915]/85 via-[#1e1915]/20 to-transparent flex flex-col justify-end p-5 text-white">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[#ffe9a9] font-medium">
+                  Autonomous & State University Schemes
                 </span>
-                <span className="text-sm font-bold leading-snug">
-                  Calm minds absorb deeper concepts.
+                <span className="text-xs font-semibold leading-relaxed text-white/90">
+                  Protected under the Indian Copyright Act 1957.
                 </span>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 3-Part Campus Vibe Showcase Strip */}
-        <div className="border-t border-[#ffe9a9]/80 bg-white/60 backdrop-blur-xs p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="flex items-center gap-3.5 p-2 rounded-2xl hover:bg-white/80 transition-colors">
-            <img
-              src="/src/assets/images/library_aesthetic_reading_1793904179717.jpg"
-              alt="Silent library reading hall"
-              className="w-16 h-16 rounded-xl object-cover shrink-0 border border-[#ffe9a9] shadow-2xs"
-              referrerPolicy="no-referrer"
-            />
-            <div>
-              <span className="text-xs font-bold text-[#1e1915] block leading-tight">
-                Quiet Library Halls
-              </span>
-              <span className="text-[11px] text-[#645548] line-clamp-1">
-                Natural sunlight & silent focus
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3.5 p-2 rounded-2xl hover:bg-white/80 transition-colors">
-            <img
-              src="/src/assets/images/study_essentials_flatlay_1793904181267.jpg"
-              alt="Study stationery and color coded notes"
-              className="w-16 h-16 rounded-xl object-cover shrink-0 border border-[#ffe9a9] shadow-2xs"
-              referrerPolicy="no-referrer"
-            />
-            <div>
-              <span className="text-xs font-bold text-[#1e1915] block leading-tight">
-                Color-Coded Mastery
-              </span>
-              <span className="text-[11px] text-[#645548] line-clamp-1">
-                Engineering formulas & diagrams
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3.5 p-2 rounded-2xl hover:bg-white/80 transition-colors">
-            <img
-              src="/src/assets/images/academic_campus_quad_1793904181259.jpg"
-              alt="Collegiate campus quad"
-              className="w-16 h-16 rounded-xl object-cover shrink-0 border border-[#ffe9a9] shadow-2xs"
-              referrerPolicy="no-referrer"
-            />
-            <div>
-              <span className="text-xs font-bold text-[#1e1915] block leading-tight">
-                Peer Review Network
-              </span>
-              <span className="text-[11px] text-[#645548] line-clamp-1">
-                Verified by accredited professors
-              </span>
             </div>
           </div>
         </div>

@@ -25,18 +25,15 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onSelect, 
   return (
     <div
       onClick={() => onSelect(document)}
-      className="group bg-white/95 rounded-2xl border border-[#ffe9a9] hover:border-[#ff933e] shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-200 p-5 flex flex-col justify-between cursor-pointer relative overflow-hidden"
+      className="group bg-white rounded-2xl border border-[#ffe9a9] hover:border-[#ea6510]/60 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 p-5 flex flex-col justify-between cursor-pointer relative"
     >
-      {/* Top subtle decorative color accent line */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#ff933e] via-[#ffcb56] to-[#73a5ca] opacity-70 group-hover:opacity-100 transition-opacity" />
-
       <div>
         {/* Unboxed Metadata Header */}
-        <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-[#645548] mb-2.5 font-semibold">
-          <span>{document.collegeName}</span>
-          <span aria-hidden="true" className="text-[#ffcb56]">·</span>
+        <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-[#645548] mb-2 font-medium">
+          <span className="font-semibold text-[#1e1915]">{document.collegeName}</span>
+          <span aria-hidden="true" className="text-[#645548]/40">·</span>
           <span>{categoryLabels[document.category] || 'Notes'}</span>
-          <span aria-hidden="true" className="text-[#ffcb56]">·</span>
+          <span aria-hidden="true" className="text-[#645548]/40">·</span>
           <span className="tabular-nums font-mono">{document.pageCount} Pages</span>
         </div>
 
@@ -51,18 +48,18 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onSelect, 
         </p>
 
         {/* Subject & Semester Strip */}
-        <div className="text-[11px] text-[#645548] mb-3.5 pb-2.5 border-b border-[#ffe9a9]/80 flex items-center justify-between">
+        <div className="text-[11px] text-[#645548] mb-3 pb-2.5 border-b border-[#ffe9a9] flex items-center justify-between">
           <span className="font-semibold text-[#1e1915]">{document.subjectName}</span>
-          <span className="text-[#1e1915] font-medium bg-[#ffe9a9] px-2 py-0.5 rounded-md border border-[#ffcb56]/60">
-            Sem {document.semester}
+          <span className="text-[#645548] font-mono text-[11px]">
+            Semester {document.semester}
           </span>
         </div>
 
         {/* Professor Verification Tag */}
         {document.professorReviewStatus === 'verified_accurate' && (
-          <div className="flex items-center gap-1.5 text-[11px] text-[#2d6289] bg-[#73a5ca]/15 px-2.5 py-1 rounded-xl border border-[#73a5ca]/40 mb-3.5 font-bold">
+          <div className="flex items-center gap-1.5 text-[11px] text-[#2d6289] bg-[#73a5ca]/10 px-2.5 py-1 rounded-lg border border-[#73a5ca]/25 mb-3 font-semibold">
             <ShieldCheck className="w-3.5 h-3.5 text-[#2d6289] shrink-0" />
-            <span>Verified Academic Audit</span>
+            <span>Faculty Verified</span>
             <span className="text-[#73a5ca]">·</span>
             <span className="tabular-nums font-mono">{document.professorVerifiedScore}/100</span>
           </div>

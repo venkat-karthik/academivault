@@ -17,8 +17,8 @@ export const SessionRevokedModal: React.FC<SessionRevokedModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1e1915]/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-[#fffdf6] rounded-3xl max-w-md w-full border border-[#ffe9a9] shadow-2xl p-6 sm:p-7 overflow-hidden relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1e1915]/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-[#fffdf6] rounded-3xl max-w-md w-full border border-[#ffe9a9] shadow-2xl p-6 sm:p-7 overflow-hidden relative animate-modal-enter">
         <div className="flex items-center gap-3.5 mb-4">
           <div className="w-12 h-12 rounded-2xl bg-[#ffe9a9] text-[#ea6510] flex items-center justify-center border border-[#ffcb56] shrink-0">
             <ShieldAlert className="w-6 h-6" />

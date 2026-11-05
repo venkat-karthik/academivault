@@ -10,7 +10,7 @@ import {
   Lock,
   BookOpen,
   Award,
-  Sparkles
+  FileText
 } from 'lucide-react';
 
 interface DocumentDetailModalProps {
@@ -87,8 +87,8 @@ export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-[#1e1915]/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-[#fffdf6] rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col border border-[#ffe9a9] shadow-2xl overflow-hidden relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-[#1e1915]/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-[#fffdf6] rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col border border-[#ffe9a9] shadow-2xl overflow-hidden relative animate-modal-enter">
         {/* Top Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#ffe9a9] bg-[#ffe9a9]/50">
           <div className="flex items-center gap-1.5 text-xs text-[#645548] font-semibold">
@@ -191,7 +191,7 @@ export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
               <div className="bg-gradient-to-r from-[#ffe9a9] via-[#fffdf6] to-[#ffcb56]/20 border border-[#ffcb56] rounded-2xl p-4 flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-1.5 text-xs font-bold text-[#ea6510] mb-0.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#ea6510]" />
+                    <FileText className="w-3.5 h-3.5 text-[#ea6510]" />
                     <span>Free Sample Preview Available</span>
                   </div>
                   <p className="text-xs text-[#645548]">

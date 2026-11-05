@@ -6,7 +6,6 @@ import {
   Play,
   Pause,
   RotateCcw,
-  Sparkles,
   ChevronUp,
   ChevronDown,
   CloudRain,
@@ -172,7 +171,7 @@ export const StudyAmbientBar: React.FC = () => {
           <div className="flex items-center justify-between pb-3 border-b border-[#ffe9a9] mb-3">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-[#ffe9a9] text-[#ea6510] flex items-center justify-center">
-                <Sparkles className="w-3.5 h-3.5" />
+                <Headphones className="w-3.5 h-3.5" />
               </div>
               <span className="text-xs font-bold text-[#1e1915]">Study Ambience & Focus</span>
             </div>
@@ -187,7 +186,7 @@ export const StudyAmbientBar: React.FC = () => {
           {/* Sound Choices */}
           <div className="space-y-2 mb-4">
             <span className="text-[11px] font-bold text-[#645548] uppercase tracking-wider block">
-              Cozy Background Sound
+              Ambient Focus Audio
             </span>
             <div className="grid grid-cols-3 gap-1.5">
               <button
@@ -199,7 +198,7 @@ export const StudyAmbientBar: React.FC = () => {
                 }`}
               >
                 <CloudRain className="w-4 h-4 mb-1" />
-                <span>Soft Rain</span>
+                <span>Rainfall</span>
               </button>
 
               <button
@@ -211,7 +210,7 @@ export const StudyAmbientBar: React.FC = () => {
                 }`}
               >
                 <Coffee className="w-4 h-4 mb-1" />
-                <span>Cafe Murmur</span>
+                <span>Reading Hall</span>
               </button>
 
               <button
@@ -223,7 +222,7 @@ export const StudyAmbientBar: React.FC = () => {
                 }`}
               >
                 <Flame className="w-4 h-4 mb-1" />
-                <span>Warm Hearth</span>
+                <span>White Noise</span>
               </button>
             </div>
 
@@ -283,7 +282,7 @@ export const StudyAmbientBar: React.FC = () => {
       ) : (
         <button
           onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#fffdf6] hover:bg-white text-[#1e1915] border border-[#ffe9a9] hover:border-[#ff933e] shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 group"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#fffdf6] hover:bg-white text-[#1e1915] border border-[#ffe9a9] hover:border-[#ea6510]/60 shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 group"
         >
           <div
             className={`w-6 h-6 rounded-xl flex items-center justify-center transition-colors ${
@@ -296,7 +295,7 @@ export const StudyAmbientBar: React.FC = () => {
           </div>
           <div className="text-left">
             <span className="text-xs font-bold block group-hover:text-[#ea6510] transition-colors leading-tight">
-              Study Vibe
+              Study Focus
             </span>
             <span className="text-[10px] text-[#645548] font-mono leading-none">
               {isPlaying ? `${sound} playing` : `${formatTimer(timerSeconds)} focus`}

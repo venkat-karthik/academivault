@@ -16,8 +16,7 @@ import {
   AlertTriangle,
   EyeOff,
   Sun,
-  Moon,
-  Sparkles
+  Moon
 } from 'lucide-react';
 
 interface ProtectedReaderModalProps {

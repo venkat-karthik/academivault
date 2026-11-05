@@ -23,18 +23,18 @@
     font-family: var(--font-sans);
     color: var(--palette-ink);
     background-color: var(--palette-paper);
-    background-image: radial-gradient(#ffe9a9 1.5px, transparent 1.5px);
-    background-size: 26px 26px;
+    background-image: radial-gradient(rgba(255, 203, 86, 0.18) 1px, transparent 1px);
+    background-size: 32px 32px;
     -webkit-font-smoothing: antialiased;
   }
 }
 
 @keyframes fade-slide-up {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
-  to {
+  100% {
     opacity: 1;
     transform: translateY(0);
   }
@@ -43,33 +43,35 @@
 @keyframes page-enter {
   0% {
     opacity: 0;
-    transform: translateY(8px) scale(0.995);
+    transform: translateY(6px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
-@keyframes gentle-float {
-  0%, 100% {
-    transform: translateY(0);
+@keyframes modal-enter {
+  0% {
+    opacity: 0;
+    transform: scale(0.98) translateY(4px);
   }
-  50% {
-    transform: translateY(-4px);
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
 .animate-fade-slide-up {
-  animation: fade-slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fade-slide-up 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .animate-page-enter {
-  animation: page-enter 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: page-enter 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-.animate-gentle-float {
-  animation: gentle-float 4s ease-in-out infinite;
+.animate-modal-enter {
+  animation: modal-enter 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 /* DRM protected reader view security rules */
