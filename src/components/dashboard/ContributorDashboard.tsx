@@ -25,6 +25,7 @@ export const ContributorDashboard: React.FC = () => {
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
   // Upload Form State
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('handwritten_notes');
@@ -77,23 +78,28 @@ export const ContributorDashboard: React.FC = () => {
     setUploadError('');
 
     try {
-      await api.uploadDocument({
-        title,
-        description,
-        category: category as any,
-        collegeId,
-        branch,
-        semester,
-        subjectName,
-        subjectCode,
-        module,
-        academicScheme,
-        pageCount,
-        price,
-        copyrightAgreed
-      });
+      const formData = new FormData();
+      if (selectedFile) {
+        formData.append('pdfFile', selectedFile);
+      }
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('category', category);
+      formData.append('collegeId', collegeId);
+      formData.append('branch', branch);
+      formData.append('semester', semester.toString());
+      formData.append('subjectName', subjectName);
+      formData.append('subjectCode', subjectCode);
+      formData.append('module', module);
+      formData.append('academicScheme', academicScheme);
+      formData.append('pageCount', pageCount.toString());
+      formData.append('price', price.toString());
+      formData.append('copyrightAgreed', 'true');
+
+      await api.uploadDocument(formData);
       setIsUploadOpen(false);
       // Reset
+      setSelectedFile(null);
       setTitle('');
       setDescription('');
       setSubjectName('');
@@ -276,6 +282,36 @@ export const ContributorDashboard: React.FC = () => {
             )}
 
             <form onSubmit={handleUpload} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-[#1e1915] mb-1.5">Original Academic PDF File</label>
+                <div className="border-2 border-dashed border-[#ffcb56] hover:border-[#ea6510] rounded-2xl p-4 text-center bg-white hover:bg-[#ffe9a9]/20 transition-all cursor-pointer relative">
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    required
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const file = e.target.files[0];
+                        setSelectedFile(file);
+                        if (!title) {
+                          setTitle(file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' '));
+                        }
+                      }
+                    }}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  />
+                  <Upload className="w-6 h-6 text-[#ea6510] mx-auto mb-1.5" />
+                  <span className="text-xs font-bold text-[#1e1915] block">
+                    {selectedFile ? selectedFile.name : 'Click or drag & drop syllabus PDF'}
+                  </span>
+                  <span className="text-[11px] text-[#645548] mt-0.5 block">
+                    {selectedFile
+                      ? `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB · Selected for upload`
+                      : 'Accepts PDF documents up to 25 MB (Will be protected via DRM)'}
+                  </span>
+                </div>
+              </div>
+
               <div>
                 <label className="block font-bold text-[#1e1915] mb-1">Document Title</label>
                 <input

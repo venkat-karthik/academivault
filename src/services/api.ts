@@ -76,17 +76,10 @@ export const api = {
     return apiFetch('/api/sessions/check');
   },
 
-  simulateSecondDevice: async (userId: string, newDeviceLabel?: string) => {
-    return apiFetch<{ message: string; newSessionId: string; newDeviceLabel: string }>('/api/sessions/simulate-second-device', {
-      method: 'POST',
-      body: JSON.stringify({ userId, newDeviceLabel })
-    });
-  },
-
-  login: async (email: string, role?: string, deviceLabel?: string): Promise<{ user: User; session: UserSession }> => {
+  login: async (email: string, password?: string, deviceLabel?: string): Promise<{ user: User; session: UserSession }> => {
     const res = await apiFetch<{ user: User; session: UserSession }>('/api/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, role, deviceLabel })
+      body: JSON.stringify({ email, password, deviceLabel })
     });
     setStoredSessionId(res.session.sessionId);
     return res;
@@ -95,6 +88,7 @@ export const api = {
   register: async (payload: {
     name: string;
     email: string;
+    password?: string;
     role: string;
     collegeId: string;
     branch?: string;
@@ -246,13 +240,43 @@ export const api = {
     return apiFetch('/api/contributor/my-documents');
   },
 
-  uploadDocument: async (payload: Partial<AcademicDocument> & { copyrightAgreed: boolean }): Promise<{
+  uploadDocument: async (payload: FormData | (Partial<AcademicDocument> & { copyrightAgreed: boolean })): Promise<{
     success: boolean;
     document: AcademicDocument;
   }> => {
     return apiFetch('/api/contributor/upload', {
       method: 'POST',
-      body: JSON.stringify(payload)
+      body: payload instanceof FormData ? payload : JSON.stringify(payload)
+    });
+  },
+
+  // Gemini AI Academic Study Companion
+  getAiSummary: async (documentId: string): Promise<{
+    success: boolean;
+    summary: {
+      chapterSummaries: { chapter: string; summary: string }[];
+      keyTakeaways: string[];
+      examImportantTopics: string[];
+    };
+  }> => {
+    return apiFetch('/api/ai/summarize-document', {
+      method: 'POST',
+      body: JSON.stringify({ documentId })
+    });
+  },
+
+  getAiFlashcards: async (documentId: string): Promise<{
+    success: boolean;
+    flashcards: {
+      id: string;
+      question: string;
+      answer: string;
+      topic: string;
+    }[];
+  }> => {
+    return apiFetch('/api/ai/generate-flashcards', {
+      method: 'POST',
+      body: JSON.stringify({ documentId })
     });
   },
 

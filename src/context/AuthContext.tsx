@@ -9,10 +9,11 @@ interface AuthContextType {
   isRevokedModalOpen: boolean;
   revokedReason: string;
   closeRevokedModal: () => void;
-  login: (email: string, role?: string, deviceLabel?: string) => Promise<void>;
+  login: (email: string, password?: string, deviceLabel?: string) => Promise<void>;
   register: (payload: {
     name: string;
     email: string;
+    password?: string;
     role: string;
     collegeId: string;
     branch?: string;
@@ -20,8 +21,6 @@ interface AuthContextType {
     deviceLabel?: string;
   }) => Promise<void>;
   logout: () => Promise<void>;
-  quickSwitchUser: (role: UserRole) => Promise<void>;
-  simulateSecondDeviceLogin: () => Promise<void>;
   refreshSession: () => Promise<void>;
 }
 
@@ -90,10 +89,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => clearInterval(interval);
   }, [session, user, handleSessionRevoked]);
 
-  const login = async (email: string, role?: string, deviceLabel?: string) => {
+  const login = async (email: string, password?: string, deviceLabel?: string) => {
     setIsLoading(true);
     try {
-      const res = await api.login(email, role, deviceLabel || 'Primary Web Device');
+      const res = await api.login(email, password, deviceLabel || 'Primary Web Device');
       setUser(res.user);
       setSession(res.session);
       setIsRevokedModalOpen(false);
@@ -105,6 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (payload: {
     name: string;
     email: string;
+    password?: string;
     role: string;
     collegeId: string;
     branch?: string;
@@ -133,37 +133,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const quickSwitchUser = async (role: UserRole) => {
-    setIsLoading(true);
-    try {
-      let email = 'rahul.sharma@iitb.ac.in';
-      if (role === 'contributor') email = 'priya.patel@bits-pilani.ac.in';
-      if (role === 'professor') email = 'ananya.sen@cse.iitb.ac.in';
-      if (role === 'admin') email = 'admin@academiavault.edu';
-
-      const res = await api.login(email, role, `Active Browser (${role.toUpperCase()})`);
-      setUser(res.user);
-      setSession(res.session);
-      setIsRevokedModalOpen(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Simulate logging into another device (e.g. MacBook Safari) to demonstrate atomic revocation
-  const simulateSecondDeviceLogin = async () => {
-    if (!user) return;
-    try {
-      await api.simulateSecondDevice(user.id, 'Safari macOS (Device B - Second Device)');
-      // Immediately re-check session to trigger instant revocation UI
-      setTimeout(() => {
-        api.checkSession().catch(() => {});
-      }, 300);
-    } catch (err: unknown) {
-      console.error('Failed to simulate 2nd device:', err);
-    }
-  };
-
   const closeRevokedModal = () => {
     setIsRevokedModalOpen(false);
   };
@@ -180,8 +149,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         register,
         logout,
-        quickSwitchUser,
-        simulateSecondDeviceLogin,
         refreshSession
       }}
     >

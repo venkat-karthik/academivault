@@ -22,10 +22,21 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onSelect, 
     complete_subject_materials: 'Complete Subject'
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSelect(document);
+    }
+  };
+
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={`View details for ${document.title}`}
       onClick={() => onSelect(document)}
-      className="group bg-white rounded-2xl border border-[#ffe9a9] hover:border-[#ea6510]/60 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 p-5 flex flex-col justify-between cursor-pointer relative"
+      onKeyDown={handleKeyDown}
+      className="group bg-white rounded-2xl border border-[#ffe9a9] hover:border-[#ea6510]/60 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 p-5 flex flex-col justify-between cursor-pointer relative focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ea6510] focus-visible:ring-offset-2"
     >
       <div>
         {/* Unboxed Metadata Header */}

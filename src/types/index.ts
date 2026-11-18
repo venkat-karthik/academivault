@@ -75,8 +75,26 @@ export interface AcademicDocument {
   createdAt: string;
   updatedAt: string;
   version: number;
+  // File and AI properties
+  fileUrl?: string;
+  cloudinaryPublicId?: string;
+  aiSummary?: AiDocumentSummary;
+  flashcards?: AiFlashcard[];
   // Private backend properties never sent directly in public views
   hasPurchased?: boolean;
+}
+
+export interface AiDocumentSummary {
+  chapterSummaries: { chapter: string; summary: string }[];
+  keyTakeaways: string[];
+  examImportantTopics: string[];
+}
+
+export interface AiFlashcard {
+  id: string;
+  question: string;
+  answer: string;
+  topic: string;
 }
 
 export interface DocumentPageContent {

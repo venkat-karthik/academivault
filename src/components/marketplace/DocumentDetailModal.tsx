@@ -65,23 +65,60 @@ export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
 
     try {
       const order = await api.createPaymentOrder(doc.id);
-      const mockPaymentId = 'pay_rzp_' + Math.random().toString(36).substring(2, 10);
-      const mockSignature = 'sig_' + Math.random().toString(36).substring(2, 12);
 
-      const verification = await api.verifyPayment({
-        orderId: order.orderId,
-        paymentId: mockPaymentId,
-        signature: mockSignature,
-        documentId: doc.id
-      });
+      if (typeof window !== 'undefined' && (window as unknown as { Razorpay?: any }).Razorpay) {
+        const RazorpayClass = (window as unknown as { Razorpay: any }).Razorpay;
+        const options = {
+          key: order.keyId,
+          amount: order.amount,
+          currency: order.currency || 'INR',
+          name: 'AcademiaVault',
+          description: `Access to: ${doc.title.slice(0, 40)}`,
+          order_id: order.orderId,
+          handler: async (response: {
+            razorpay_payment_id: string;
+            razorpay_order_id: string;
+            razorpay_signature: string;
+          }) => {
+            try {
+              const verification = await api.verifyPayment({
+                orderId: response.razorpay_order_id,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+                documentId: doc.id
+              });
 
-      if (verification.success) {
-        setDoc((prev) => (prev ? { ...prev, hasPurchased: true } : null));
-        onPurchaseSuccess();
+              if (verification.success) {
+                setDoc((prev) => (prev ? { ...prev, hasPurchased: true } : null));
+                onPurchaseSuccess();
+              }
+            } catch (err: unknown) {
+              setPurchaseError(err instanceof Error ? err.message : 'Signature verification failed.');
+            } finally {
+              setPurchasing(false);
+            }
+          },
+          prefill: {
+            name: user.name,
+            email: user.email
+          },
+          theme: {
+            color: '#ea6510'
+          },
+          modal: {
+            ondismiss: () => {
+              setPurchasing(false);
+            }
+          }
+        };
+
+        const rzp = new RazorpayClass(options);
+        rzp.open();
+      } else {
+        throw new Error('Razorpay payment gateway SDK is initializing. Please try again in a few seconds.');
       }
     } catch (err: unknown) {
       setPurchaseError(err instanceof Error ? err.message : 'Payment process failed.');
-    } finally {
       setPurchasing(false);
     }
   };
