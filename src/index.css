@@ -38,11 +38,21 @@
   font-family: var(--font-mono);
 }
 
-/* Security DRM Defenses: Defeat Print-to-PDF Scraping */
+/* Security DRM Defenses: Defeat Print-to-PDF Scraping on protected canvas only */
 @media print {
-  html, body {
+  .drm-protected-canvas, .no-print {
     display: none !important;
     visibility: hidden !important;
+  }
+}
+
+/* Accessibility: Respect Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    opacity: 1 !important;
   }
 }
 
@@ -64,7 +74,7 @@
 
 @keyframes fade-slide-up {
   0% {
-    opacity: 0;
+    opacity: 0.01;
     transform: translateY(8px);
   }
   100% {
@@ -75,7 +85,7 @@
 
 @keyframes modal-enter {
   0% {
-    opacity: 0;
+    opacity: 0.01;
     transform: scale(0.98) translateY(4px);
   }
   100% {
@@ -89,9 +99,11 @@
 }
 
 .animate-fade-slide-up {
+  opacity: 1;
   animation: fade-slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-modal-enter {
+  opacity: 1;
   animation: modal-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

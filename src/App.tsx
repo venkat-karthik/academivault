@@ -118,7 +118,7 @@ function MainApp() {
 
       {/* Main Content Area */}
       <main className="flex-1 w-full mx-auto">
-        <div key={currentTab} className="animate-fade-slide-up">
+        <div key={currentTab}>
           {renderCurrentView()}
         </div>
       </main>

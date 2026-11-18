@@ -23,16 +23,28 @@ export const setSessionRevocationListener = (cb: (message: string) => void) => {
 
 export const setStoredSessionId = (id: string | null) => {
   currentSessionId = id;
-  if (id) {
-    sessionStorage.setItem('academiasecure_session_id', id);
-  } else {
-    sessionStorage.removeItem('academiasecure_session_id');
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      if (id) {
+        window.sessionStorage.setItem('academiasecure_session_id', id);
+      } else {
+        window.sessionStorage.removeItem('academiasecure_session_id');
+      }
+    }
+  } catch {
+    // Graceful fallback when storage is restricted by browser shields or private mode
   }
 };
 
 export const getStoredSessionId = (): string | null => {
   if (!currentSessionId) {
-    currentSessionId = sessionStorage.getItem('academiasecure_session_id');
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        currentSessionId = window.sessionStorage.getItem('academiasecure_session_id');
+      }
+    } catch {
+      // Graceful fallback when storage is restricted
+    }
   }
   return currentSessionId;
 };
