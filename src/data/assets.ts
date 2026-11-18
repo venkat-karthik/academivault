@@ -5,3 +5,4 @@ export const CLOUDINARY_ASSETS = {
   studyFlatlay: 'https://res.cloudinary.com/mcjwmthb/image/upload/v1794988398/academivault/site-assets/study_essentials_flatlay_1793904181267.jpg',
   heroDesk: 'https://res.cloudinary.com/mcjwmthb/image/upload/v1794988400/academivault/site-assets/hero_cozy_study_desk_1793904180995.jpg'
 };
+
