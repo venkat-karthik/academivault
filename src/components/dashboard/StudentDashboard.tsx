@@ -77,44 +77,44 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenReader
   return (
     <div className="space-y-8 max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-16 animate-fade-slide-up">
       {/* Student Profile Header with Study Vibe Visual */}
-      <div className="p-6 sm:p-8 bg-white rounded-2xl border border-gray-200 shadow-xs flex flex-wrap items-center justify-between gap-6 relative overflow-hidden">
+      <div className="p-6 sm:p-8 bg-white rounded-3xl border border-[#E8E2D9] shadow-xs flex flex-wrap items-center justify-between gap-6 relative overflow-hidden">
         <div className="flex items-center gap-5">
           <img
             src={CLOUDINARY_ASSETS.studyFlatlay}
             alt="Student study notebook and coffee flatlay"
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-gray-200 shadow-xs shrink-0"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-[#E8E2D9] shadow-xs shrink-0"
             referrerPolicy="no-referrer"
           />
           <div>
-            <span className="text-[11px] font-mono font-bold text-[#D97706] uppercase tracking-wider block mb-0.5">
+            <span className="text-[11px] font-mono font-bold text-[#C06A28] uppercase tracking-wider block mb-0.5">
               Student Personal Vault
             </span>
-            <h2 className="text-xl sm:text-2xl font-bold text-[#111827] font-editorial tracking-tight">{user?.name}</h2>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#1C1917] font-editorial tracking-tight">{user?.name}</h2>
+            <p className="text-xs text-[#78716C] mt-0.5">
               {user?.collegeName} · {user?.branch} · Semester {user?.semester}
             </p>
           </div>
         </div>
 
-        <div className="bg-[#FEF3C7] border border-[#FDE68A] px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 text-[#D97706]">
-          <Shield className="w-3.5 h-3.5 text-[#D97706]" />
+        <div className="bg-[#FDF3D8] border border-[#F6E2B2] px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 text-[#B45309]">
+          <Shield className="w-3.5 h-3.5 text-[#C06A28]" />
           <span>Active Device Protected</span>
         </div>
       </div>
 
       {/* Purchased Materials List */}
       <div>
-        <h3 className="text-lg font-bold text-[#111827] mb-4 flex items-center gap-2 font-editorial">
-          <BookOpen className="w-5 h-5 text-[#D97706]" />
-          <span>My Purchased Documents & Licensed Access</span>
+        <h3 className="text-lg font-bold text-[#1C1917] mb-4 flex items-center gap-2 font-editorial">
+          <BookOpen className="w-5 h-5 text-[#C06A28]" />
+          <span>My Purchased Documents &amp; Licensed Access</span>
         </h3>
 
         {loading ? (
-          <div className="py-12 text-center text-gray-400 text-xs font-mono">Loading purchased vault library...</div>
+          <div className="py-12 text-center text-[#A8A29E] text-xs font-mono">Loading purchased vault library...</div>
         ) : purchases.length === 0 ? (
-          <div className="p-10 text-center bg-white rounded-2xl border border-gray-200 shadow-xs">
-            <p className="text-sm font-semibold text-[#111827] mb-1.5">You haven't purchased any notes yet.</p>
-            <p className="text-xs text-gray-500">
+          <div className="p-10 text-center bg-white rounded-3xl border border-[#E8E2D9] shadow-xs">
+            <p className="text-sm font-semibold text-[#1C1917] mb-1.5">You haven't purchased any notes yet.</p>
+            <p className="text-xs text-[#78716C]">
               Browse the university catalogue to purchase verified study materials and unlock full DRM reader access.
             </p>
           </div>
@@ -123,35 +123,35 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenReader
             {purchases.map((doc) => (
               <div
                 key={doc.id}
-                className="bg-white rounded-2xl border border-gray-200 hover:border-gray-300 p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between space-y-4"
+                className="bg-white rounded-2xl border border-[#E8E2D9] hover:border-[#D5CDC1] p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between space-y-4"
               >
                 <div>
-                  <div className="flex items-center justify-between text-xs text-gray-500 mb-2 font-semibold">
+                  <div className="flex items-center justify-between text-xs text-[#78716C] mb-2 font-semibold">
                     <span>{doc.collegeName}</span>
-                    <span className="text-emerald-700 font-bold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                    <span className="text-emerald-800 font-bold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
                       <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
                       <span>Licensed</span>
                     </span>
                   </div>
 
-                  <h4 className="text-base font-bold text-[#111827] mb-1.5 leading-snug">
+                  <h4 className="text-base font-bold text-[#1C1917] mb-1.5 leading-snug">
                     {doc.title}
                   </h4>
-                  <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{doc.description}</p>
+                  <p className="text-xs text-[#57534E] line-clamp-2 leading-relaxed">{doc.description}</p>
                 </div>
 
-                <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+                <div className="pt-3 border-t border-[#F0EBE3] flex items-center justify-between">
                   <button
                     onClick={() => setSelectedDocForReview(doc)}
-                    className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-[#D97706] transition-colors cursor-pointer"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-[#78716C] hover:text-[#C06A28] transition-colors cursor-pointer"
                   >
-                    <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                    <Star className="w-3.5 h-3.5 text-[#C06A28] fill-[#C06A28]" />
                     <span>Write Verified Review</span>
                   </button>
 
                   <button
                     onClick={() => onOpenReader(doc)}
-                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-[#111827] hover:bg-gray-800 text-white transition-all shadow-xs cursor-pointer"
+                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-[#1C1917] hover:bg-[#C06A28] text-white transition-all shadow-xs cursor-pointer"
                   >
                     <BookOpen className="w-3.5 h-3.5 text-[#FEF3C7]" />
                     <span>Open Reader</span>

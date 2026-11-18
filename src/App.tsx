@@ -92,7 +92,7 @@ function MainApp() {
 
   if (currentTab === 'signin' || currentTab === 'auth') {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] text-[#111827] selection:bg-[#FEF3C7] selection:text-[#D97706]">
+      <div className="min-h-screen bg-[#FAF8F5] text-[#1C1917] selection:bg-[#FEF3C7] selection:text-[#C06A28]">
         <AuthPage
           onBack={() => setCurrentTab('marketplace')}
           onSuccess={() => setCurrentTab('marketplace')}
@@ -108,7 +108,7 @@ function MainApp() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAFAFA] text-[#111827] selection:bg-[#FEF3C7] selection:text-[#D97706] transition-colors duration-150">
+    <div className="min-h-screen flex flex-col bg-[#FAF8F5] text-[#1C1917] selection:bg-[#FEF3C7] selection:text-[#C06A28] transition-colors duration-150">
       {/* Main Navigation Top Bar */}
       <Header
         currentTab={currentTab}

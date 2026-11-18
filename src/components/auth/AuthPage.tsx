@@ -169,7 +169,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-[#FAFAFA] text-[#111827]">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-[#FAF8F5] text-[#1C1917]">
       {/* LEFT COLUMN: Editorial Showcase & Academic Brand Narrative (Hidden on mobile / small screens) */}
       <div className="hidden lg:flex lg:w-1/2 xl:w-5/12 bg-[#0B0F17] text-white flex-col justify-between p-12 xl:p-16 relative overflow-hidden">
         {/* Subtle Ambient Radial Glow */}
