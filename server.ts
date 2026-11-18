@@ -37,6 +37,14 @@ const isDev = process.env.NODE_ENV !== 'production';
 // Support Vercel and reverse proxies securely
 app.set('trust proxy', 1);
 
+// Normalize incoming paths so /auth/google matches /api/auth/google on Vercel
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  if (req.url && !req.url.startsWith('/api') && !req.url.startsWith('/_') && !req.url.startsWith('/assets')) {
+    req.url = '/api' + req.url;
+  }
+  next();
+});
+
 // ==========================================
 // SECURITY HEADERS & RATE LIMITING
 // ==========================================
