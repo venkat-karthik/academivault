@@ -25,12 +25,14 @@ interface ProtectedReaderModalProps {
   document: AcademicDocument | null;
   isOpen: boolean;
   onClose: () => void;
+  onOpenAuth?: () => void;
 }
 
 export const ProtectedReaderModal: React.FC<ProtectedReaderModalProps> = ({
   document: doc,
   isOpen,
-  onClose
+  onClose,
+  onOpenAuth
 }) => {
   const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
@@ -200,6 +202,11 @@ export const ProtectedReaderModal: React.FC<ProtectedReaderModalProps> = ({
 
           <button
             type="button"
+            onClick={() => {
+              if (!doc.hasPurchased && onOpenAuth) {
+                onOpenAuth();
+              }
+            }}
             className="bg-[#111827] hover:bg-gray-800 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
           >
             {doc.hasPurchased ? 'Download Note' : 'Sign In to Download'}

@@ -19,6 +19,7 @@ interface DocumentDetailModalProps {
   onClose: () => void;
   onOpenReader: (doc: AcademicDocument) => void;
   onPurchaseSuccess: () => void;
+  onOpenAuth?: () => void;
 }
 
 export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
@@ -26,7 +27,8 @@ export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
   isOpen,
   onClose,
   onOpenReader,
-  onPurchaseSuccess
+  onPurchaseSuccess,
+  onOpenAuth
 }) => {
   const { user } = useAuth();
   const [doc, setDoc] = useState<AcademicDocument | null>(initialDoc);
@@ -57,7 +59,11 @@ export const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
 
   const handlePurchase = async () => {
     if (!user) {
-      setPurchaseError('Please sign in to purchase access to this document.');
+      if (onOpenAuth) {
+        onOpenAuth();
+      } else {
+        setPurchaseError('Please sign in to purchase access to this document.');
+      }
       return;
     }
     setPurchaseError('');

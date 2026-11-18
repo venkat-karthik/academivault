@@ -4,6 +4,7 @@ import { Header } from './components/common/Header';
 import { Footer } from './components/common/Footer';
 import { SessionRevokedModal } from './components/common/SessionRevokedModal';
 import { AuthModal } from './components/auth/AuthModal';
+import { AuthPage } from './components/auth/AuthPage';
 import { MarketplaceView } from './components/marketplace/MarketplaceView';
 import { DocumentDetailModal } from './components/marketplace/DocumentDetailModal';
 import { ProtectedReaderModal } from './components/reader/ProtectedReaderModal';
@@ -30,6 +31,15 @@ function MainApp() {
 
   const renderCurrentView = () => {
     switch (currentTab) {
+      case 'signin':
+      case 'auth':
+        return (
+          <AuthPage
+            onBack={() => setCurrentTab('marketplace')}
+            onSuccess={() => setCurrentTab('marketplace')}
+            onOpenAdminGateway={() => setIsAdminGatewayOpen(true)}
+          />
+        );
       case 'colleges':
         return (
           <CollegesListingView
@@ -45,16 +55,16 @@ function MainApp() {
       case 'dashboard':
         if (!user) {
           return (
-            <div className="py-16 text-center bg-[#fffdf6] rounded-3xl border border-[#ffe9a9] p-8 max-w-lg mx-auto shadow-2xs">
-              <h3 className="text-lg font-bold text-[#1e1915] mb-2">Authentication Required</h3>
-              <p className="text-xs text-[#645548] mb-5">
+            <div className="py-16 text-center bg-white rounded-2xl border border-gray-200 p-8 max-w-lg mx-auto shadow-xs">
+              <h3 className="text-lg font-bold text-[#111827] mb-2 font-editorial">Authentication Required</h3>
+              <p className="text-xs text-gray-500 mb-5">
                 Please sign in to access your personal dashboard, purchased library, and active session settings.
               </p>
               <button
-                onClick={() => setIsAuthOpen(true)}
-                className="px-6 py-2.5 rounded-xl bg-[#ea6510] text-white font-bold text-xs hover:bg-[#d45707] transition-all shadow-xs hover:shadow-md active:scale-95"
+                onClick={() => setCurrentTab('signin')}
+                className="px-6 py-2.5 rounded-xl bg-[#111827] text-white font-semibold text-xs hover:bg-gray-800 transition-all shadow-xs active:scale-95 cursor-pointer"
               >
-                Sign In Now
+                Sign In to Vault
               </button>
             </div>
           );
@@ -80,13 +90,30 @@ function MainApp() {
     }
   };
 
+  if (currentTab === 'signin' || currentTab === 'auth') {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] text-[#111827] selection:bg-[#FEF3C7] selection:text-[#D97706]">
+        <AuthPage
+          onBack={() => setCurrentTab('marketplace')}
+          onSuccess={() => setCurrentTab('marketplace')}
+          onOpenAdminGateway={() => setIsAdminGatewayOpen(true)}
+        />
+        <AdminGatewayModal
+          isOpen={isAdminGatewayOpen}
+          onClose={() => setIsAdminGatewayOpen(false)}
+          onAdminAuthenticated={() => setCurrentTab('admin')}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-[#FAFAFA] text-[#111827] selection:bg-[#FEF3C7] selection:text-[#D97706] transition-colors duration-150">
       {/* Main Navigation Top Bar */}
       <Header
         currentTab={currentTab}
         onSelectTab={(tab) => setCurrentTab(tab)}
-        onOpenAuth={() => setIsAuthOpen(true)}
+        onOpenAuth={() => setCurrentTab('signin')}
       />
 
       {/* Main Content Area */}
@@ -114,7 +141,7 @@ function MainApp() {
         onClose={closeRevokedModal}
         onReLogin={() => {
           closeRevokedModal();
-          setIsAuthOpen(true);
+          setCurrentTab('signin');
         }}
       />
 
@@ -129,12 +156,20 @@ function MainApp() {
         onPurchaseSuccess={() => {
           // If viewing dashboard or marketplace, state refreshes automatically
         }}
+        onOpenAuth={() => {
+          setSelectedDocument(null);
+          setCurrentTab('signin');
+        }}
       />
 
       <ProtectedReaderModal
         document={readerDocument}
         isOpen={Boolean(readerDocument)}
         onClose={() => setReaderDocument(null)}
+        onOpenAuth={() => {
+          setReaderDocument(null);
+          setCurrentTab('signin');
+        }}
       />
     </div>
   );
