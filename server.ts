@@ -1333,8 +1333,15 @@ export async function startServer() {
   });
 }
 
-// Start if not in serverless runtime
-if (!process.env.VERCEL) {
+// Only start dev/standalone server when executed directly from CLI, NEVER in serverless/import mode
+const isDirectRun = Boolean(
+  process.argv[1] && (
+    process.argv[1].endsWith('server.ts') ||
+    process.argv[1].endsWith('server.js')
+  )
+);
+
+if (isDirectRun && !process.env.VERCEL) {
   startServer().catch((err) => {
     console.error('[AcademiaVault] Server failed to start:', err);
   });
