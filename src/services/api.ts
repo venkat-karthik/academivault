@@ -8,6 +8,7 @@ import {
   ProfessorVerification,
   PurchaseRecord,
   SecurityEventLog,
+  SitePhoto,
   StudentReview,
   User,
   UserSession
@@ -96,6 +97,21 @@ export const api = {
     deviceLabel?: string;
   }): Promise<{ user: User; session: UserSession }> => {
     const res = await apiFetch<{ user: User; session: UserSession }>('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    setStoredSessionId(res.session.sessionId);
+    return res;
+  },
+
+  loginWithGoogle: async (payload: {
+    credential?: string;
+    email?: string;
+    name?: string;
+    avatarUrl?: string;
+    deviceLabel?: string;
+  }): Promise<{ user: User; session: UserSession }> => {
+    const res = await apiFetch<{ user: User; session: UserSession }>('/api/auth/google', {
       method: 'POST',
       body: JSON.stringify(payload)
     });
@@ -340,5 +356,26 @@ export const api = {
 
   getAdminSecurityLogs: async (): Promise<SecurityEventLog[]> => {
     return apiFetch('/api/admin/security-logs');
+  },
+
+  getAdminPurchases: async (): Promise<PurchaseRecord[]> => {
+    return apiFetch('/api/admin/purchases');
+  },
+
+  getAdminPhotos: async (): Promise<SitePhoto[]> => {
+    return apiFetch('/api/admin/photos');
+  },
+
+  uploadAdminPhoto: async (formData: FormData): Promise<{ success: boolean; photo: SitePhoto }> => {
+    return apiFetch('/api/admin/photos', {
+      method: 'POST',
+      body: formData
+    });
+  },
+
+  deleteAdminPhoto: async (id: string): Promise<{ success: boolean }> => {
+    return apiFetch(`/api/admin/photos/${id}`, {
+      method: 'DELETE'
+    });
   }
 };

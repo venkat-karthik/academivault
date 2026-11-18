@@ -1,6 +1,7 @@
 import React from 'react';
 import { INITIAL_COLLEGES } from '../../data/mockData';
 import { GraduationCap, MapPin, ArrowRight, Building } from 'lucide-react';
+import { CLOUDINARY_ASSETS } from '../../data/assets';
 
 interface CollegesListingViewProps {
   onSelectCollege: (collegeId: string) => void;
@@ -27,7 +28,7 @@ export const CollegesListingView: React.FC<CollegesListingViewProps> = ({ onSele
           <div className="md:col-span-5">
             <div className="relative rounded-2xl overflow-hidden border border-[#ffe9a9] shadow-sm group">
               <img
-                src="/src/assets/images/academic_campus_quad_1793904181259.jpg"
+                src={CLOUDINARY_ASSETS.campusQuad}
                 alt="University campus quad with students studying on benches"
                 className="w-full h-48 object-cover object-center group-hover:scale-105 transition-transform duration-500"
                 referrerPolicy="no-referrer"

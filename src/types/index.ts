@@ -236,3 +236,12 @@ export interface College {
   universityName: string;
   branches: string[];
 }
+
+export interface SitePhoto {
+  id: string;
+  url: string;
+  publicId: string;
+  name: string;
+  bytes: number;
+  uploadedAt: string;
+}

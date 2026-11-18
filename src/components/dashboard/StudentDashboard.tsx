@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AcademicDocument, PurchaseRecord } from '../../types';
 import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { CLOUDINARY_ASSETS } from '../../data/assets';
 import {
   BookOpen,
   Star,
@@ -79,7 +80,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenReader
       <div className="p-6 sm:p-8 bg-[#fffdf6] rounded-3xl border border-[#ffe9a9] shadow-xs flex flex-wrap items-center justify-between gap-6 relative overflow-hidden">
         <div className="flex items-center gap-5">
           <img
-            src="/src/assets/images/study_essentials_flatlay_1793904181267.jpg"
+            src={CLOUDINARY_ASSETS.studyFlatlay}
             alt="Student study notebook and coffee flatlay"
             className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-[#ffe9a9] shadow-2xs shrink-0"
             referrerPolicy="no-referrer"

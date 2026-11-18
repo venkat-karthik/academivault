@@ -1,7 +1,11 @@
 import React from 'react';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Lock } from 'lucide-react';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenAdmin?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
   return (
     <footer className="bg-[#fffdf6] border-t border-[#ffe9a9] mt-20 text-[#645548] text-xs">
       <div className="max-w-7xl mx-auto px-6 py-12">
@@ -50,8 +54,18 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#645548]/70">
-          <div>
-            © 2026 AcademiaVault. All academic study materials protected under the Indian Copyright Act 1957.
+          <div className="flex items-center gap-2">
+            <span>© 2026 AcademiaVault. All academic study materials protected under the Indian Copyright Act 1957.</span>
+            {onOpenAdmin && (
+              <button
+                onClick={onOpenAdmin}
+                title="Staff Console"
+                aria-label="Staff Console"
+                className="opacity-40 hover:opacity-100 hover:text-[#ea6510] transition-opacity p-0.5 rounded cursor-pointer ml-1 inline-flex items-center"
+              >
+                <Lock className="w-3 h-3" />
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-4">
             <span className="hover:text-[#ea6510] cursor-pointer">Privacy Policy</span>

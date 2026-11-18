@@ -13,12 +13,14 @@ import { ProfessorPortal } from './components/dashboard/ProfessorPortal';
 import { AdminDashboard } from './components/dashboard/AdminDashboard';
 import { DrmExplanationView } from './components/common/DrmExplanationView';
 import { CollegesListingView } from './components/common/CollegesListingView';
+import { AdminGatewayModal } from './components/auth/AdminGatewayModal';
 import { AcademicDocument } from './types';
 
 function MainApp() {
   const { user, isRevokedModalOpen, revokedReason, closeRevokedModal } = useAuth();
   const [currentTab, setCurrentTab] = useState<string>('marketplace');
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isAdminGatewayOpen, setIsAdminGatewayOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<AcademicDocument | null>(null);
   const [readerDocument, setReaderDocument] = useState<AcademicDocument | null>(null);
 
@@ -38,6 +40,8 @@ function MainApp() {
         return <DrmExplanationView />;
       case 'professor-portal':
         return <ProfessorPortal />;
+      case 'admin':
+        return <AdminDashboard />;
       case 'dashboard':
         if (!user) {
           return (
@@ -92,11 +96,17 @@ function MainApp() {
         </div>
       </main>
 
-      {/* Institutional Footer */}
-      <Footer />
+      {/* Institutional Footer with Hidden Admin Trigger */}
+      <Footer onOpenAdmin={() => setIsAdminGatewayOpen(true)} />
 
       {/* Modals */}
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+
+      <AdminGatewayModal
+        isOpen={isAdminGatewayOpen}
+        onClose={() => setIsAdminGatewayOpen(false)}
+        onAdminAuthenticated={() => setCurrentTab('admin')}
+      />
 
       <SessionRevokedModal
         isOpen={isRevokedModalOpen}

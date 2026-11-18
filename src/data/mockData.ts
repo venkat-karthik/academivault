@@ -100,9 +100,9 @@ export const INITIAL_USERS: User[] = [
     createdAt: '2026-06-10T09:15:00Z'
   },
   {
-    id: 'usr_admin_system',
-    name: 'Academia Administrator',
-    email: 'admin@academiavault.edu',
+    id: 'usr_admin_karthik',
+    name: 'Karthik Venkat',
+    email: 'karthikvenkat316@gmail.com',
     role: 'admin',
     isEmailVerified: true,
     createdAt: '2026-01-01T00:00:00Z'

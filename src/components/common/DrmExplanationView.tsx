@@ -1,5 +1,6 @@
 import React from 'react';
 import { Shield, Lock, Laptop, FileX, Eye } from 'lucide-react';
+import { CLOUDINARY_ASSETS } from '../../data/assets';
 
 export const DrmExplanationView: React.FC = () => {
   return (
@@ -23,7 +24,7 @@ export const DrmExplanationView: React.FC = () => {
           <div className="md:col-span-5">
             <div className="relative rounded-2xl overflow-hidden border border-[#ffe9a9] shadow-sm group">
               <img
-                src="/src/assets/images/library_aesthetic_reading_1793904179717.jpg"
+                src={CLOUDINARY_ASSETS.libraryReading}
                 alt="Students studying in sunlit university reading hall"
                 className="w-full h-48 object-cover object-center group-hover:scale-105 transition-transform duration-500"
                 referrerPolicy="no-referrer"

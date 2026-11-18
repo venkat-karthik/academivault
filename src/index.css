@@ -3,47 +3,78 @@
 
 @layer base {
   :root {
+    --font-serif: 'Instrument Serif', Georgia, serif;
+    --font-display: 'Outfit', 'Plus Jakarta Sans', sans-serif;
     --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
     
-    /* User Color Hunt Palette (#ff933e, #ffcb56, #ffe9a9, #73a5ca) */
-    --palette-orange: #ff933e;
-    --palette-gold: #ffcb56;
-    --palette-cream: #ffe9a9;
-    --palette-blue: #73a5ca;
-    --palette-paper: #fffdf6;
+    --palette-orange: #f97316;
+    --palette-gold: #f59e0b;
+    --palette-amber: #d97706;
+    --palette-paper: #faf8f5;
     --palette-surface: #ffffff;
-    --palette-ink: #1e1915;
-    --palette-ink-muted: #645548;
-    --palette-accent-warm: #ea6510;
-    --palette-accent-blue: #2d6289;
+    --palette-ink: #0f172a;
+    --palette-ink-muted: #64748b;
+    --palette-accent-warm: #ea580c;
+    --palette-accent-blue: #1e3a8a;
   }
 
   body {
     font-family: var(--font-sans);
     color: var(--palette-ink);
     background-color: var(--palette-paper);
-    background-image: radial-gradient(rgba(255, 203, 86, 0.18) 1px, transparent 1px);
-    background-size: 32px 32px;
+    background-image: 
+      radial-gradient(at 10% 10%, rgba(245, 158, 11, 0.08) 0px, transparent 50%),
+      radial-gradient(at 90% 15%, rgba(249, 115, 22, 0.06) 0px, transparent 45%),
+      radial-gradient(at 50% 90%, rgba(59, 130, 246, 0.04) 0px, transparent 55%),
+      radial-gradient(rgba(217, 119, 6, 0.12) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+}
+
+.font-editorial {
+  font-family: var(--font-serif);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(0.5deg);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
   }
 }
 
 @keyframes fade-slide-up {
   0% {
     opacity: 0;
-    transform: translateY(8px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes page-enter {
-  0% {
-    opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(12px);
   }
   100% {
     opacity: 1;
@@ -54,7 +85,7 @@
 @keyframes modal-enter {
   0% {
     opacity: 0;
-    transform: scale(0.98) translateY(4px);
+    transform: scale(0.96) translateY(8px);
   }
   100% {
     opacity: 1;
@@ -62,16 +93,37 @@
   }
 }
 
-.animate-fade-slide-up {
-  animation: fade-slide-up 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
 }
 
-.animate-page-enter {
-  animation: page-enter 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+.animate-fade-slide-up {
+  animation: fade-slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-modal-enter {
-  animation: modal-enter 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: modal-enter 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.shimmer-badge {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s infinite;
+}
+
+/* Glassmorphism helpers */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(229, 231, 235, 0.7);
+}
+
+.glass-panel-warm {
+  background: rgba(255, 253, 248, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(251, 191, 36, 0.25);
 }
 
 /* DRM protected reader view security rules */

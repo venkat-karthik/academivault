@@ -21,7 +21,7 @@ import {
   UserSession
 } from './src/types';
 import { repository } from './src/lib/firestoreRepository';
-import { uploadPdfBuffer, isCloudinaryConfigured } from './src/lib/cloudinary';
+import { uploadPdfBuffer, uploadImageBuffer, deleteCloudinaryAsset, isCloudinaryConfigured } from './src/lib/cloudinary';
 import { generateDocumentSummary, generateStudyFlashcards } from './src/lib/gemini';
 import { isFirestoreConfigured } from './src/lib/firebaseAdmin';
 
@@ -131,6 +131,19 @@ const optionalSession = async (req: AuthenticatedRequest, _res: Response, next: 
         req.currentUser = safeUser;
       }
     }
+  }
+  next();
+};
+
+const ADMIN_EMAIL = 'karthikvenkat316@gmail.com';
+
+const requireAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  const user = req.currentUser;
+  if (!user || user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase() || user.role !== 'admin') {
+    return res.status(403).json({
+      error: 'UNAUTHORIZED_ADMIN_ACCESS',
+      message: 'Administrative privileges are restricted exclusively to the verified platform owner.'
+    });
   }
   next();
 };
@@ -261,6 +274,61 @@ app.post('/api/auth/register', authLimiter, async (req: Request, res: Response) 
     });
   } catch (err: unknown) {
     res.status(400).json({ error: err instanceof Error ? err.message : 'Registration failed.' });
+  }
+});
+
+app.post('/api/auth/google', authLimiter, async (req: Request, res: Response) => {
+  const { credential, email, name, avatarUrl, deviceLabel } = req.body;
+  const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+  const userAgent = (req.headers['user-agent'] as string) || 'Unknown Browser';
+  const device = deviceLabel || 'Primary Web Device';
+
+  let targetEmail = email;
+  let targetName = name;
+  let targetAvatar = avatarUrl;
+
+  if (credential) {
+    try {
+      const parts = credential.split('.');
+      if (parts.length === 3) {
+        const payloadJson = Buffer.from(parts[1], 'base64').toString('utf8');
+        const tokenPayload = JSON.parse(payloadJson);
+        targetEmail = tokenPayload.email || targetEmail;
+        targetName = tokenPayload.name || targetName;
+        targetAvatar = tokenPayload.picture || targetAvatar;
+      }
+    } catch (jwtErr) {
+      console.warn('[Google Auth] Failed to parse JWT payload:', jwtErr);
+    }
+  }
+
+  if (!targetEmail) {
+    return res.status(400).json({ error: 'Valid Google email is required.' });
+  }
+
+  try {
+    const user = await repository.findOrCreateGoogleUser({
+      email: targetEmail,
+      name: targetName || targetEmail.split('@')[0],
+      avatarUrl: targetAvatar
+    });
+
+    const session = await repository.createSession(user.id, device, clientIp, userAgent);
+
+    res.cookie('academiasecure_session', session.sessionId, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 30 * 24 * 60 * 60 * 1000
+    });
+
+    const { passwordHash, ...safeUser } = user;
+    res.json({
+      user: safeUser,
+      session
+    });
+  } catch (err: unknown) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Google authentication failed' });
   }
 });
 
@@ -999,13 +1067,8 @@ app.get('/api/student/purchases', requireSession, async (req: AuthenticatedReque
   res.json(purchasedDocs.filter(Boolean));
 });
 
-// 12. ADMINISTRATOR GOVERNANCE PORTAL
-app.get('/api/admin/overview', requireSession, async (req: AuthenticatedRequest, res: Response) => {
-  const user = req.currentUser!;
-  if (user.role !== 'admin') {
-    return res.status(403).json({ error: 'Administrative privileges required.' });
-  }
-
+// 12. ADMINISTRATOR GOVERNANCE PORTAL (STRICTLY RESTRICTED TO karthikvenkat316@gmail.com)
+app.get('/api/admin/overview', requireSession, requireAdmin, async (_req: AuthenticatedRequest, res: Response) => {
   const allPurchases = repository.getAllPurchases();
   const allDocs = await repository.getDocuments();
   const grossRevenue = allPurchases.reduce((sum, p) => sum + p.amount, 0);
@@ -1025,17 +1088,59 @@ app.get('/api/admin/overview', requireSession, async (req: AuthenticatedRequest,
   });
 });
 
-app.get('/api/admin/documents', requireSession, async (req: AuthenticatedRequest, res: Response) => {
-  const user = req.currentUser!;
-  if (user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+app.get('/api/admin/purchases', requireSession, requireAdmin, (_req: AuthenticatedRequest, res: Response) => {
+  res.json(repository.getAllPurchases());
+});
+
+app.get('/api/admin/photos', requireSession, requireAdmin, (_req: AuthenticatedRequest, res: Response) => {
+  res.json(repository.getSitePhotos());
+});
+
+app.post('/api/admin/photos', requireSession, requireAdmin, upload.single('photo'), async (req: AuthenticatedRequest, res: Response) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No image file provided for upload.' });
+  }
+
+  try {
+    const uploaded = await uploadImageBuffer(
+      req.file.buffer,
+      req.file.originalname,
+      'academivault/site-assets'
+    );
+
+    const sitePhoto = {
+      id: 'photo_' + Date.now(),
+      name: (req.body.name as string) || req.file.originalname.replace(/\.[^/.]+$/, ''),
+      url: uploaded.secure_url,
+      publicId: uploaded.public_id,
+      bytes: uploaded.bytes,
+      uploadedAt: new Date().toISOString()
+    };
+
+    repository.addSitePhoto(sitePhoto);
+    res.json({ success: true, photo: sitePhoto });
+  } catch (err) {
+    console.error('[Admin Photo Upload Error]', err);
+    res.status(500).json({ error: 'Cloudinary photo upload failed' });
+  }
+});
+
+app.delete('/api/admin/photos/:id', requireSession, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+  const photo = repository.getSitePhotos().find((p) => p.id === req.params.id);
+  if (photo && photo.publicId) {
+    await deleteCloudinaryAsset(photo.publicId);
+  }
+  repository.deleteSitePhoto(req.params.id);
+  res.json({ success: true, message: 'Photo deleted successfully.' });
+});
+
+app.get('/api/admin/documents', requireSession, requireAdmin, async (_req: AuthenticatedRequest, res: Response) => {
   const docs = await repository.getDocuments();
   res.json(docs);
 });
 
-app.post('/api/admin/documents/:id/status', requireSession, async (req: AuthenticatedRequest, res: Response) => {
+app.post('/api/admin/documents/:id/status', requireSession, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
   const user = req.currentUser!;
-  if (user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
-
   const { status } = req.body;
   const doc = await repository.getDocumentById(req.params.id);
   if (!doc) return res.status(404).json({ error: 'Document not found' });
@@ -1057,23 +1162,16 @@ app.post('/api/admin/documents/:id/status', requireSession, async (req: Authenti
   res.json({ success: true, document: doc });
 });
 
-app.get('/api/admin/sessions', requireSession, (req: AuthenticatedRequest, res: Response) => {
-  const user = req.currentUser!;
-  if (user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+app.get('/api/admin/sessions', requireSession, requireAdmin, (_req: AuthenticatedRequest, res: Response) => {
   res.json(repository.getAllSessions().slice(-50));
 });
 
-app.post('/api/admin/sessions/:sessionId/revoke', requireSession, async (req: AuthenticatedRequest, res: Response) => {
-  const user = req.currentUser!;
-  if (user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
-
+app.post('/api/admin/sessions/:sessionId/revoke', requireSession, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
   await repository.revokeSession(req.params.sessionId, 'Session terminated by an administrator.');
   res.json({ success: true, message: 'Session terminated forcefully.' });
 });
 
-app.get('/api/admin/security-logs', requireSession, (req: AuthenticatedRequest, res: Response) => {
-  const user = req.currentUser!;
-  if (user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+app.get('/api/admin/security-logs', requireSession, requireAdmin, (_req: AuthenticatedRequest, res: Response) => {
   res.json(repository.getSecurityLogs());
 });
 

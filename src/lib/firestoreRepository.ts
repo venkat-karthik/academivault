@@ -27,6 +27,15 @@ export interface StoredUser extends User {
   passwordHash?: string;
 }
 
+export interface SitePhoto {
+  id: string;
+  url: string;
+  publicId: string;
+  name: string;
+  bytes: number;
+  uploadedAt: string;
+}
+
 export class FirestoreRepository {
   // Local fallback cache for speed and when Firestore credentials are being configured
   private localUsers = new Map<string, StoredUser>();
@@ -41,6 +50,40 @@ export class FirestoreRepository {
   private localEntitlements = new Set<string>(); // "userId:docId"
   private localPayouts = new Map<string, PayoutRecord>();
   private localSecurityLogs: SecurityEventLog[] = [];
+  private localPhotos: SitePhoto[] = [
+    {
+      id: 'photo_1',
+      name: 'Library Aesthetic Reading',
+      url: 'https://res.cloudinary.com/mcjwmthb/image/upload/v1794988399/academivault/site-assets/library_aesthetic_reading_1793904179717.jpg',
+      publicId: 'academivault/site-assets/library_aesthetic_reading_1793904179717',
+      bytes: 980992,
+      uploadedAt: '2026-11-18T13:23:00Z'
+    },
+    {
+      id: 'photo_2',
+      name: 'Academic Campus Quadrangle',
+      url: 'https://res.cloudinary.com/mcjwmthb/image/upload/v1794988401/academivault/site-assets/academic_campus_quad_1793904181259.jpg',
+      publicId: 'academivault/site-assets/academic_campus_quad_1793904181259',
+      bytes: 1048576,
+      uploadedAt: '2026-11-18T13:23:00Z'
+    },
+    {
+      id: 'photo_3',
+      name: 'Study Essentials Flatlay',
+      url: 'https://res.cloudinary.com/mcjwmthb/image/upload/v1794988398/academivault/site-assets/study_essentials_flatlay_1793904181267.jpg',
+      publicId: 'academivault/site-assets/study_essentials_flatlay_1793904181267',
+      bytes: 831488,
+      uploadedAt: '2026-11-18T13:23:00Z'
+    },
+    {
+      id: 'photo_4',
+      name: 'Cozy Study Desk & Notes',
+      url: 'https://res.cloudinary.com/mcjwmthb/image/upload/v1794988400/academivault/site-assets/hero_cozy_study_desk_1793904180995.jpg',
+      publicId: 'academivault/site-assets/hero_cozy_study_desk_1793904180995',
+      bytes: 791552,
+      uploadedAt: '2026-11-18T13:23:00Z'
+    }
+  ];
 
   constructor() {
     this.seedBaselineData();
@@ -127,11 +170,13 @@ export class FirestoreRepository {
       ? await bcrypt.hash(payload.password, 10)
       : await bcrypt.hash('AcademicSecure2026!', 10);
 
+    const isAdmin = cleanEmail === 'karthikvenkat316@gmail.com';
+
     const newUser: StoredUser = {
       id: userId,
       name: payload.name.trim(),
       email: cleanEmail,
-      role: (payload.role === 'contributor' ? 'contributor' : 'student') as any,
+      role: isAdmin ? 'admin' : (payload.role === 'contributor' ? 'contributor' : 'student') as any,
       collegeId: payload.collegeId,
       collegeName: college?.name || 'Selected University',
       branch: payload.branch || 'Computer Science & Engineering',
@@ -146,6 +191,52 @@ export class FirestoreRepository {
         await firestoreDb.collection('users').doc(userId).set(newUser);
       } catch (err) {
         console.error('[Firestore] createUser error:', err);
+      }
+    }
+
+    this.localUsers.set(userId, newUser);
+    return newUser;
+  }
+
+  async findOrCreateGoogleUser(payload: {
+    email: string;
+    name: string;
+    avatarUrl?: string;
+  }): Promise<StoredUser> {
+    const cleanEmail = payload.email.trim().toLowerCase();
+    let user = await this.findUserByEmail(cleanEmail);
+    const isAdmin = cleanEmail === 'karthikvenkat316@gmail.com';
+
+    if (user) {
+      if (isAdmin && user.role !== 'admin') {
+        user.role = 'admin';
+        if (isFirestoreConfigured && firestoreDb) {
+          await firestoreDb.collection('users').doc(user.id).update({ role: 'admin' });
+        }
+      }
+      return user;
+    }
+
+    const userId = 'usr_' + crypto.randomBytes(8).toString('hex');
+    const newUser: StoredUser = {
+      id: userId,
+      name: payload.name || cleanEmail.split('@')[0],
+      email: cleanEmail,
+      role: isAdmin ? 'admin' : 'student',
+      avatarUrl: payload.avatarUrl,
+      isEmailVerified: true,
+      collegeId: 'iit-bombay',
+      collegeName: 'Indian Institute of Technology Bombay',
+      branch: 'Computer Science & Engineering',
+      semester: 1,
+      createdAt: new Date().toISOString()
+    };
+
+    if (isFirestoreConfigured && firestoreDb) {
+      try {
+        await firestoreDb.collection('users').doc(userId).set(newUser);
+      } catch (err) {
+        console.error('[Firestore] Google user creation error:', err);
       }
     }
 
@@ -503,6 +594,27 @@ export class FirestoreRepository {
 
   getAllPurchases(): PurchaseRecord[] {
     return Array.from(this.localPurchases.values());
+  }
+
+  // -------------------------------------------------------------
+  // SITE PHOTOS (CLOUDINARY)
+  // -------------------------------------------------------------
+  getSitePhotos(): SitePhoto[] {
+    return this.localPhotos;
+  }
+
+  addSitePhoto(photo: SitePhoto): void {
+    this.localPhotos.unshift(photo);
+    if (isFirestoreConfigured && firestoreDb) {
+      firestoreDb.collection('site_photos').doc(photo.id).set(photo).catch(() => {});
+    }
+  }
+
+  deleteSitePhoto(id: string): void {
+    this.localPhotos = this.localPhotos.filter((p) => p.id !== id);
+    if (isFirestoreConfigured && firestoreDb) {
+      firestoreDb.collection('site_photos').doc(id).delete().catch(() => {});
+    }
   }
 }
 

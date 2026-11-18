@@ -65,5 +65,55 @@ export async function uploadPdfBuffer(
   });
 }
 
+export async function uploadImageBuffer(
+  buffer: Buffer,
+  filename: string,
+  folder = 'academivault/site-assets'
+): Promise<{ secure_url: string; public_id: string; bytes: number; width?: number; height?: number }> {
+  if (!isConfigured) {
+    const mockId = `img_${Date.now()}_${filename.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    return {
+      secure_url: `/uploads/${mockId}.jpg`,
+      public_id: `academivault/site-assets/${mockId}`,
+      bytes: buffer.length
+    };
+  }
+
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: 'image',
+        public_id: filename.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_') + '_' + Date.now()
+      },
+      (error, result?: UploadApiResponse) => {
+        if (error || !result) {
+          reject(error || new Error('Image upload failed'));
+        } else {
+          resolve({
+            secure_url: result.secure_url,
+            public_id: result.public_id,
+            bytes: result.bytes,
+            width: result.width,
+            height: result.height
+          });
+        }
+      }
+    );
+    uploadStream.end(buffer);
+  });
+}
+
+export async function deleteCloudinaryAsset(publicId: string): Promise<boolean> {
+  if (!isConfigured) return true;
+  try {
+    const res = await cloudinary.uploader.destroy(publicId, { resource_type: 'image' });
+    return res.result === 'ok';
+  } catch (err) {
+    console.error('[Cloudinary] Failed to delete asset:', publicId, err);
+    return false;
+  }
+}
+
 export { cloudinary, isConfigured as isCloudinaryConfigured };
 

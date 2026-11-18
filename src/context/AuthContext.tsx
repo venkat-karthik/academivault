@@ -10,6 +10,13 @@ interface AuthContextType {
   revokedReason: string;
   closeRevokedModal: () => void;
   login: (email: string, password?: string, deviceLabel?: string) => Promise<void>;
+  loginWithGoogle: (payload: {
+    credential?: string;
+    email?: string;
+    name?: string;
+    avatarUrl?: string;
+    deviceLabel?: string;
+  }) => Promise<void>;
   register: (payload: {
     name: string;
     email: string;
@@ -101,6 +108,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginWithGoogle = async (payload: {
+    credential?: string;
+    email?: string;
+    name?: string;
+    avatarUrl?: string;
+    deviceLabel?: string;
+  }) => {
+    setIsLoading(true);
+    try {
+      const res = await api.loginWithGoogle({
+        ...payload,
+        deviceLabel: payload.deviceLabel || 'Primary Web Device'
+      });
+      setUser(res.user);
+      setSession(res.session);
+      setIsRevokedModalOpen(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const register = async (payload: {
     name: string;
     email: string;
@@ -147,6 +175,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         revokedReason,
         closeRevokedModal,
         login,
+        loginWithGoogle,
         register,
         logout,
         refreshSession
