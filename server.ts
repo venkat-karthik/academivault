@@ -1310,8 +1310,11 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 // VITE DEV SERVER / STATIC SERVING
 // ==========================================
 export async function startServer() {
+  if (process.env.VERCEL) return;
+
   if (isDev) {
-    const { createServer: createViteServer } = await import('vite');
+    const vitePkg = 'vite';
+    const { createServer: createViteServer } = await import(/* @vite-ignore */ vitePkg);
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa'
@@ -1325,11 +1328,9 @@ export async function startServer() {
   }
 
   // Only listen when executed directly in standalone/dev mode
-  if (!process.env.VERCEL) {
-    app.listen(PORT, () => {
-      console.log(`[AcademiaVault] Full-Stack Secure Marketplace live on port ${PORT}`);
-    });
-  }
+  app.listen(PORT, () => {
+    console.log(`[AcademiaVault] Full-Stack Secure Marketplace live on port ${PORT}`);
+  });
 }
 
 // Start if not in serverless runtime
