@@ -432,6 +432,10 @@ export class FirestoreRepository {
     return docs;
   }
 
+  getDocumentsSync(): AcademicDocument[] {
+    return Array.from(this.localDocuments.values());
+  }
+
   async getDocumentById(id: string): Promise<AcademicDocument | null> {
     if (isFirestoreConfigured && firestoreDb) {
       try {

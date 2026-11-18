@@ -1,6 +1,6 @@
 import React from 'react';
 import { AcademicDocument } from '../../types';
-import { Star, ShieldCheck, CheckCircle, ArrowUpRight, BookOpen, Sparkles } from 'lucide-react';
+import { ShieldCheck, CheckCircle, ArrowUpRight, MoreVertical, GraduationCap } from 'lucide-react';
 
 interface DocumentCardProps {
   document: AcademicDocument;
@@ -33,6 +33,16 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onSelect, 
     ? Math.round(((document.originalPrice - document.price) / document.originalPrice) * 100)
     : 0;
 
+  // Generate clean initials for college crest
+  const collegeInitials = document.collegeName
+    ? document.collegeName
+        .split(' ')
+        .map((w) => w[0])
+        .slice(0, 3)
+        .join('')
+        .toUpperCase()
+    : 'IIT';
+
   return (
     <div
       role="button"
@@ -40,86 +50,97 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onSelect, 
       aria-label={`View details for ${document.title}`}
       onClick={() => onSelect(document)}
       onKeyDown={handleKeyDown}
-      className="group bg-white rounded-3xl border border-[#ffe9a9] hover:border-[#ea6510]/50 shadow-xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 p-6 flex flex-col justify-between cursor-pointer relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ea6510]"
+      className="group bg-white rounded-2xl border border-gray-200/90 shadow-xs hover:shadow-md hover:border-gray-300 transition-all duration-200 p-5 flex flex-col justify-between cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#D97706]"
     >
-      {/* Top Subtle Amber Corner Accent */}
-      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[#ffcb56]/15 to-transparent rounded-bl-full pointer-events-none group-hover:from-[#ea6510]/20 transition-all duration-300" />
-
       <div>
-        {/* Category & College Pill Bar */}
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#ffe9a9]/70 text-[#ea6510] border border-[#ffcb56]/60">
-            {categoryLabels[document.category] || 'Academic Notes'}
-          </span>
+        {/* Top Header Row matching Mockup: Crest, College Name & Date */}
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center font-mono font-bold text-[11px] text-[#111827] shrink-0">
+              {collegeInitials}
+            </div>
+            <div className="min-w-0">
+              <h4 className="text-xs font-bold text-[#111827] truncate">
+                {document.collegeName}
+              </h4>
+              <p className="text-[10px] text-gray-400 font-medium">
+                January 2026 • Sem {document.semester}
+              </p>
+            </div>
+          </div>
 
-          <span className="text-[11px] font-mono text-[#645548] tabular-nums font-semibold">
-            {document.pageCount} Pages
-          </span>
+          <button
+            type="button"
+            aria-label="More options"
+            className="text-gray-400 hover:text-gray-600 p-1 -mr-1 rounded-md"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(document);
+            }}
+          >
+            <MoreVertical className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Institution wordmark */}
-        <div className="text-[11px] font-semibold text-[#645548] mb-1 truncate">
-          {document.collegeName}
-        </div>
-
-        {/* Document Title */}
-        <h3 className="text-base font-bold text-[#1e1915] group-hover:text-[#ea6510] transition-colors leading-snug line-clamp-2 mb-2 font-editorial">
+        {/* Title */}
+        <h3 className="text-[15px] font-bold text-[#111827] group-hover:text-[#D97706] transition-colors leading-snug line-clamp-2 mb-1.5">
           {document.title}
         </h3>
 
         {/* Description */}
-        <p className="text-xs text-[#645548] line-clamp-2 mb-4 leading-relaxed">
+        <p className="text-xs text-gray-500 line-clamp-2 mb-4 leading-relaxed">
           {document.description}
         </p>
 
-        {/* Subject & Semester Strip */}
-        <div className="text-[11px] text-[#645548] mb-3.5 pb-3 border-b border-[#ffe9a9] flex items-center justify-between">
-          <span className="font-semibold text-[#1e1915] truncate max-w-[170px]">
-            {document.subjectName}
-          </span>
-          <span className="text-[#645548] font-mono text-[10px] uppercase tracking-wider bg-[#fffdf6] px-2 py-0.5 rounded border border-[#ffe9a9]">
-            Sem {document.semester}
-          </span>
+        {/* Statistics Metric Badges (Mockup Style: 154+ Curated Packs • 9.8K Verified Notes) */}
+        <div className="grid grid-cols-3 gap-2 py-2.5 px-3 rounded-xl bg-gray-50/70 border border-gray-100 mb-3 text-center">
+          <div>
+            <span className="block font-mono font-bold text-xs text-[#111827]">
+              {document.pageCount}+
+            </span>
+            <span className="block text-[9px] text-gray-400 font-medium uppercase tracking-wider">
+              Pages
+            </span>
+          </div>
+          <div>
+            <span className="block font-mono font-bold text-xs text-[#111827]">
+              ★ {document.rating}
+            </span>
+            <span className="block text-[9px] text-gray-400 font-medium uppercase tracking-wider">
+              Rating
+            </span>
+          </div>
+          <div>
+            <span className="block font-mono font-bold text-xs text-[#D97706]">
+              {document.totalSales ? `${document.totalSales}+` : '9.8K'}
+            </span>
+            <span className="block text-[9px] text-gray-400 font-medium uppercase tracking-wider">
+              Notes
+            </span>
+          </div>
         </div>
 
-        {/* Professor Verification Tag */}
-        {document.professorReviewStatus === 'verified_accurate' && (
-          <div className="flex items-center gap-1.5 text-[11px] text-[#2d6289] bg-[#73a5ca]/10 px-2.5 py-1.5 rounded-xl border border-[#73a5ca]/25 mb-4 font-semibold">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#2d6289] shrink-0" />
-            <span>Faculty Verified</span>
-            <span className="text-[#73a5ca]">·</span>
-            <span className="tabular-nums font-mono">{document.professorVerifiedScore}/100 Rigor</span>
-          </div>
-        )}
+        {/* Verified Faculty Audit Badge */}
+        <div className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 bg-emerald-50/80 px-2.5 py-1 rounded-lg border border-emerald-100 mb-4 w-fit">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <span>Verified Faculty Audit</span>
+        </div>
       </div>
 
       <div>
-        {/* Author & Rating */}
-        <div className="flex items-center justify-between text-xs text-[#645548] mb-3.5 pt-1">
-          <span className="truncate max-w-[160px] text-[11px] font-medium">
-            By {document.contributorName}
-          </span>
-
-          <div className="flex items-center gap-1 shrink-0 font-bold text-[#1e1915] text-xs">
-            <Star className="w-3.5 h-3.5 fill-[#ffcb56] text-[#ff933e]" />
-            <span className="tabular-nums font-mono">{document.rating}</span>
-            <span className="text-[#645548]/70 text-[10px]">({document.ratingCount})</span>
-          </div>
-        </div>
-
-        {/* Price & Action Button */}
-        <div className="flex items-center justify-between pt-3.5 border-t border-[#ffe9a9]">
-          <div className="flex items-baseline gap-2">
-            <span className="text-xl font-black text-[#1e1915] tabular-nums font-mono">
+        {/* Footer: Price & Preview / Unlock Action Button */}
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-base font-mono font-extrabold text-[#111827]">
               ₹{document.price}
             </span>
             {document.originalPrice && (
-              <span className="text-xs text-[#645548]/50 line-through tabular-nums font-mono">
+              <span className="text-[11px] text-gray-400 line-through font-mono">
                 ₹{document.originalPrice}
               </span>
             )}
             {discountPercent > 0 && (
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+              <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded">
                 {discountPercent}% OFF
               </span>
             )}
@@ -131,7 +152,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onSelect, 
                 e.stopPropagation();
                 onRead(document);
               }}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white transition-all shadow-xs active:scale-95"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white transition-all shadow-xs"
             >
               <CheckCircle className="w-3.5 h-3.5" />
               <span>Read (Owned)</span>
@@ -142,10 +163,10 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onSelect, 
                 e.stopPropagation();
                 onSelect(document);
               }}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-[#ea6510] hover:bg-[#d45707] text-white transition-all shadow-xs hover:shadow-md active:scale-95 group-hover:bg-[#d45707]"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#111827] hover:bg-gray-800 text-white transition-all shadow-xs cursor-pointer group-hover:bg-[#D97706]"
             >
-              <span>License</span>
-              <ArrowUpRight className="w-3.5 h-3.5 text-white/80 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              <span>Preview</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
           )}
         </div>

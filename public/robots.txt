@@ -1,0 +1,32 @@
+# AcademiaVault Security & DRM Robots Policy
+User-agent: *
+Disallow: /api/
+Disallow: /api/reader/
+Disallow: /documents/
+Disallow: /preview/
+Disallow: /uploads/
+Disallow: /admin/
+
+# Block aggressive AI scrapers and automated bulk harvesters
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+Sitemap: https://academivault.vercel.app/sitemap.xml

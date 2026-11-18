@@ -81,7 +81,7 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fffdf6] text-[#1e1915] selection:bg-[#ffcb56]/60 selection:text-[#1e1915] transition-colors duration-200">
+    <div className="min-h-screen flex flex-col bg-[#FAFAFA] text-[#111827] selection:bg-[#FEF3C7] selection:text-[#D97706] transition-colors duration-150">
       {/* Main Navigation Top Bar */}
       <Header
         currentTab={currentTab}
@@ -89,9 +89,9 @@ function MainApp() {
         onOpenAuth={() => setIsAuthOpen(true)}
       />
 
-      {/* Main Content Area with Page Transition Animation */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
-        <div key={currentTab} className="animate-page-enter">
+      {/* Main Content Area */}
+      <main className="flex-1 w-full mx-auto">
+        <div key={currentTab} className="animate-fade-slide-up">
           {renderCurrentView()}
         </div>
       </main>

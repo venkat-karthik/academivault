@@ -34,6 +34,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const isDev = process.env.NODE_ENV !== 'production';
 
+// Support Vercel and reverse proxies securely
+app.set('trust proxy', 1);
+
 // ==========================================
 // SECURITY HEADERS & RATE LIMITING
 // ==========================================
@@ -42,10 +45,34 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://checkout.razorpay.com'],
-        frameSrc: ["'self'", 'https://api.razorpay.com', 'https://checkout.razorpay.com'],
-        connectSrc: ["'self'", 'https://api.razorpay.com', 'https://lumberjack.razorpay.com', 'https://generativelanguage.googleapis.com'],
-        imgSrc: ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com', 'https://images.unsplash.com'],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "'unsafe-eval'",
+          'https://checkout.razorpay.com',
+          'https://accounts.google.com'
+        ],
+        frameSrc: [
+          "'self'",
+          'https://api.razorpay.com',
+          'https://checkout.razorpay.com',
+          'https://accounts.google.com'
+        ],
+        connectSrc: [
+          "'self'",
+          'https://api.razorpay.com',
+          'https://lumberjack.razorpay.com',
+          'https://generativelanguage.googleapis.com',
+          'https://accounts.google.com'
+        ],
+        imgSrc: [
+          "'self'",
+          'data:',
+          'blob:',
+          'https://res.cloudinary.com',
+          'https://images.unsplash.com',
+          'https://*.googleusercontent.com'
+        ],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com']
       }
@@ -59,16 +86,22 @@ app.use(cookieParser());
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
-// Auth & Payment Rate Limiter
+// Auth & Payment Rate Limiter with serverless reverse proxy tolerance
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 30,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false, trustProxy: false },
   message: { error: 'Too many authentication attempts. Please try again after 15 minutes.' }
 });
 
 const paymentLimiter = rateLimit({
   windowMs: 5 * 60 * 1000,
-  max: 40,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false, trustProxy: false },
   message: { error: 'Rate limit exceeded for payment requests. Please try again in 5 minutes.' }
 });
 
@@ -120,17 +153,21 @@ const requireSession = async (req: AuthenticatedRequest, res: Response, next: Ne
 };
 
 const optionalSession = async (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
-  const sessionId = (req.headers['x-session-id'] as string) || req.cookies?.academiasecure_session;
-  if (sessionId) {
-    const validation = await repository.validateSession(sessionId);
-    if (validation.valid && validation.session) {
-      req.userSession = validation.session;
-      const user = await repository.findUserById(validation.session.userId);
-      if (user) {
-        const { passwordHash, ...safeUser } = user;
-        req.currentUser = safeUser;
+  try {
+    const sessionId = (req.headers['x-session-id'] as string) || req.cookies?.academiasecure_session;
+    if (sessionId) {
+      const validation = await repository.validateSession(sessionId);
+      if (validation && validation.valid && validation.session) {
+        req.userSession = validation.session;
+        const user = await repository.findUserById(validation.session.userId);
+        if (user) {
+          const { passwordHash, ...safeUser } = user;
+          req.currentUser = safeUser;
+        }
       }
     }
+  } catch (err) {
+    console.warn('[optionalSession Warning]', err);
   }
   next();
 };
@@ -168,25 +205,33 @@ app.get('/api/health', (_req: Request, res: Response) => {
 
 // 2. Session Status Check
 app.get('/api/sessions/check', async (req: AuthenticatedRequest, res: Response) => {
-  const sessionId = (req.headers['x-session-id'] as string) || req.cookies?.academiasecure_session;
-  const validation = await repository.validateSession(sessionId);
-  if (!validation.valid) {
-    return res.status(401).json({
-      valid: false,
-      error: 'SESSION_REVOKED_OR_EXPIRED',
-      message: validation.error || 'Your account was signed in on another device. Please log in again.'
+  try {
+    const sessionId = (req.headers['x-session-id'] as string) || req.cookies?.academiasecure_session;
+    if (!sessionId) {
+      return res.json({ valid: false });
+    }
+    const validation = await repository.validateSession(sessionId);
+    if (!validation || !validation.valid || !validation.session) {
+      return res.json({
+        valid: false,
+        error: 'SESSION_REVOKED_OR_EXPIRED',
+        message: validation?.error || 'No active session found.'
+      });
+    }
+    const user = await repository.findUserById(validation.session.userId);
+    if (!user) {
+      return res.json({ valid: false, error: 'User profile not found' });
+    }
+    const { passwordHash, ...safeUser } = user;
+    res.json({
+      valid: true,
+      session: validation.session,
+      user: safeUser
     });
+  } catch (err) {
+    console.warn('[Session Check Error]', err);
+    res.json({ valid: false });
   }
-  const user = await repository.findUserById(validation.session!.userId);
-  if (!user) {
-    return res.status(404).json({ valid: false, error: 'User profile not found' });
-  }
-  const { passwordHash, ...safeUser } = user;
-  res.json({
-    valid: true,
-    session: validation.session,
-    user: safeUser
-  });
 });
 
 // 3. Authentication (Production Login & Register with Password Hashing)
@@ -346,46 +391,70 @@ app.get('/api/colleges', (_req: Request, res: Response) => {
 });
 
 app.get('/api/documents', optionalSession, async (req: AuthenticatedRequest, res: Response) => {
-  const docs = await repository.getDocuments({
-    collegeId: req.query.collegeId as string,
-    category: req.query.category as string,
-    branch: req.query.branch as string,
-    semester: req.query.semester as string,
-    search: req.query.search as string,
-    sort: req.query.sort as string,
-    professorVerifiedOnly: req.query.professorVerifiedOnly === 'true'
-  });
+  try {
+    const docs = await repository.getDocuments({
+      collegeId: req.query.collegeId as string,
+      category: req.query.category as string,
+      branch: req.query.branch as string,
+      semester: req.query.semester as string,
+      search: req.query.search as string,
+      sort: req.query.sort as string,
+      professorVerifiedOnly: req.query.professorVerifiedOnly === 'true'
+    });
 
-  const currentUserId = req.currentUser?.id;
-  const enrichedDocs = await Promise.all(
-    docs.map(async (doc) => {
-      const hasPurchased = currentUserId ? await repository.hasEntitlement(currentUserId, doc.id) : false;
-      return { ...doc, hasPurchased };
-    })
-  );
+    const currentUserId = req.currentUser?.id;
+    const enrichedDocs = await Promise.all(
+      docs.map(async (doc) => {
+        let hasPurchased = false;
+        if (currentUserId) {
+          try {
+            hasPurchased = await repository.hasEntitlement(currentUserId, doc.id);
+          } catch {
+            hasPurchased = false;
+          }
+        }
+        return { ...doc, hasPurchased };
+      })
+    );
 
-  res.json(enrichedDocs);
+    res.json(enrichedDocs);
+  } catch (err) {
+    console.error('[API Documents Error]', err);
+    res.json(repository.getDocumentsSync());
+  }
 });
 
 app.get('/api/documents/:id', optionalSession, async (req: AuthenticatedRequest, res: Response) => {
-  const doc = await repository.getDocumentById(req.params.id);
-  if (!doc) {
-    return res.status(404).json({ error: 'Document not found' });
+  try {
+    const doc = await repository.getDocumentById(req.params.id);
+    if (!doc) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    const currentUserId = req.currentUser?.id;
+    let hasPurchased = false;
+    if (currentUserId) {
+      try {
+        hasPurchased = await repository.hasEntitlement(currentUserId, doc.id);
+      } catch {
+        hasPurchased = false;
+      }
+    }
+    const reviews = await repository.getReviewsForDocument(doc.id).catch(() => []);
+    const professorReviews = await repository.getProfessorReviewsForDocument(doc.id).catch(() => []);
+
+    res.json({
+      document: {
+        ...doc,
+        hasPurchased
+      },
+      reviews,
+      professorReviews
+    });
+  } catch (err) {
+    console.error('[API Document Detail Error]', err);
+    res.status(500).json({ error: 'Failed to retrieve document details' });
   }
-
-  const currentUserId = req.currentUser?.id;
-  const hasPurchased = currentUserId ? await repository.hasEntitlement(currentUserId, doc.id) : false;
-  const reviews = await repository.getReviewsForDocument(doc.id);
-  const professorReviews = await repository.getProfessorReviewsForDocument(doc.id);
-
-  res.json({
-    document: {
-      ...doc,
-      hasPurchased
-    },
-    reviews,
-    professorReviews
-  });
 });
 
 // 5. SECURE DRM PROTECTED DOCUMENT READER ENGINE
