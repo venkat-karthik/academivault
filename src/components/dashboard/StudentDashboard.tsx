@@ -75,46 +75,46 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenReader
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-200">
+    <div className="space-y-8 max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-16 animate-fade-slide-up">
       {/* Student Profile Header with Study Vibe Visual */}
-      <div className="p-6 sm:p-8 bg-[#fffdf6] rounded-3xl border border-[#ffe9a9] shadow-xs flex flex-wrap items-center justify-between gap-6 relative overflow-hidden">
+      <div className="p-6 sm:p-8 bg-white rounded-2xl border border-gray-200 shadow-xs flex flex-wrap items-center justify-between gap-6 relative overflow-hidden">
         <div className="flex items-center gap-5">
           <img
             src={CLOUDINARY_ASSETS.studyFlatlay}
             alt="Student study notebook and coffee flatlay"
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-[#ffe9a9] shadow-2xs shrink-0"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-gray-200 shadow-xs shrink-0"
             referrerPolicy="no-referrer"
           />
           <div>
-            <span className="text-[11px] font-bold text-[#ea6510] uppercase tracking-wider block mb-0.5">
-              Student Personal Library
+            <span className="text-[11px] font-mono font-bold text-[#D97706] uppercase tracking-wider block mb-0.5">
+              Student Personal Vault
             </span>
-            <h2 className="text-xl sm:text-2xl font-bold text-[#1e1915]">{user?.name}</h2>
-            <p className="text-xs text-[#645548] mt-0.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#111827] font-editorial tracking-tight">{user?.name}</h2>
+            <p className="text-xs text-gray-500 mt-0.5">
               {user?.collegeName} · {user?.branch} · Semester {user?.semester}
             </p>
           </div>
         </div>
 
-        <div className="bg-[#ffe9a9]/40 border border-[#ffe9a9] px-4 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 text-[#ea6510] shadow-2xs">
-          <Shield className="w-3.5 h-3.5 text-[#ea6510]" />
+        <div className="bg-[#FEF3C7] border border-[#FDE68A] px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 text-[#D97706]">
+          <Shield className="w-3.5 h-3.5 text-[#D97706]" />
           <span>Active Device Protected</span>
         </div>
       </div>
 
       {/* Purchased Materials List */}
       <div>
-        <h3 className="text-lg font-bold text-[#1e1915] mb-4 flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-[#ea6510]" />
+        <h3 className="text-lg font-bold text-[#111827] mb-4 flex items-center gap-2 font-editorial">
+          <BookOpen className="w-5 h-5 text-[#D97706]" />
           <span>My Purchased Documents & Licensed Access</span>
         </h3>
 
         {loading ? (
-          <div className="py-12 text-center text-[#645548] text-xs">Loading purchased library...</div>
+          <div className="py-12 text-center text-gray-400 text-xs font-mono">Loading purchased vault library...</div>
         ) : purchases.length === 0 ? (
-          <div className="p-10 text-center bg-[#fffdf6] rounded-3xl border border-[#ffe9a9] shadow-2xs">
-            <p className="text-sm font-semibold text-[#1e1915] mb-1.5">You haven't purchased any notes yet.</p>
-            <p className="text-xs text-[#645548]">
+          <div className="p-10 text-center bg-white rounded-2xl border border-gray-200 shadow-xs">
+            <p className="text-sm font-semibold text-[#111827] mb-1.5">You haven't purchased any notes yet.</p>
+            <p className="text-xs text-gray-500">
               Browse the university catalogue to purchase verified study materials and unlock full DRM reader access.
             </p>
           </div>
@@ -123,37 +123,37 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenReader
             {purchases.map((doc) => (
               <div
                 key={doc.id}
-                className="bg-[#fffdf6] rounded-2xl border border-[#ffe9a9] hover:border-[#ff933e] p-5 shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between space-y-4"
+                className="bg-white rounded-2xl border border-gray-200 hover:border-gray-300 p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between space-y-4"
               >
                 <div>
-                  <div className="flex items-center justify-between text-xs text-[#645548] mb-2 font-semibold">
+                  <div className="flex items-center justify-between text-xs text-gray-500 mb-2 font-semibold">
                     <span>{doc.collegeName}</span>
-                    <span className="text-[#2d6289] font-bold flex items-center gap-1 bg-[#73a5ca]/15 px-2 py-0.5 rounded-md border border-[#73a5ca]/30">
-                      <CheckCircle className="w-3.5 h-3.5" />
+                    <span className="text-emerald-700 font-bold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                      <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
                       <span>Licensed</span>
                     </span>
                   </div>
 
-                  <h4 className="text-base font-bold text-[#1e1915] mb-1.5 leading-snug">
+                  <h4 className="text-base font-bold text-[#111827] mb-1.5 leading-snug">
                     {doc.title}
                   </h4>
-                  <p className="text-xs text-[#645548] line-clamp-2 leading-relaxed">{doc.description}</p>
+                  <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{doc.description}</p>
                 </div>
 
-                <div className="pt-3 border-t border-[#ffe9a9] flex items-center justify-between">
+                <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
                   <button
                     onClick={() => setSelectedDocForReview(doc)}
-                    className="flex items-center gap-1.5 text-xs font-semibold text-[#645548] hover:text-[#ea6510] transition-colors"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-[#D97706] transition-colors cursor-pointer"
                   >
-                    <Star className="w-3.5 h-3.5 text-[#ffcb56] fill-[#ffcb56]" />
+                    <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
                     <span>Write Verified Review</span>
                   </button>
 
                   <button
                     onClick={() => onOpenReader(doc)}
-                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-[#ea6510] hover:bg-[#d45707] text-white transition-all shadow-2xs hover:shadow-xs active:scale-95"
+                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-[#111827] hover:bg-gray-800 text-white transition-all shadow-xs cursor-pointer"
                   >
-                    <BookOpen className="w-3.5 h-3.5 text-[#ffe9a9]" />
+                    <BookOpen className="w-3.5 h-3.5 text-[#FEF3C7]" />
                     <span>Open Reader</span>
                   </button>
                 </div>
@@ -165,17 +165,17 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenReader
 
       {/* Review Modal Form */}
       {selectedDocForReview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1e1915]/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-[#fffdf6] rounded-3xl max-w-lg w-full border border-[#ffe9a9] shadow-2xl p-6 sm:p-8 relative">
-            <h3 className="text-lg font-bold text-[#1e1915] mb-1">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#111827]/70 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl max-w-lg w-full border border-gray-200 shadow-xl p-6 sm:p-8 relative">
+            <h3 className="text-lg font-bold text-[#111827] mb-1 font-editorial">
               Submit Verified Student Review
             </h3>
-            <p className="text-xs text-[#645548] mb-4 truncate font-medium">
+            <p className="text-xs text-gray-500 mb-4 truncate font-medium">
               {selectedDocForReview.title}
             </p>
 
             {reviewSuccess ? (
-              <div className="p-4 bg-emerald-50 text-emerald-800 rounded-2xl text-xs font-semibold flex items-center gap-2 border border-emerald-200">
+              <div className="p-4 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-2 border border-emerald-200">
                 <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>Thank you! Your verified purchase review has been published.</span>
               </div>
@@ -187,17 +187,17 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenReader
 
                 {/* Overall Stars */}
                 <div>
-                  <label className="block font-bold text-[#1e1915] mb-1.5">Overall Satisfaction (1-5)</label>
+                  <label className="block font-bold text-[#111827] mb-1.5">Overall Satisfaction (1-5)</label>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <button
                         type="button"
                         key={s}
                         onClick={() => setRating(s)}
-                        className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all active:scale-95 ${
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
                           rating === s
-                            ? 'bg-[#ea6510] text-white border-[#ea6510] shadow-2xs'
-                            : 'bg-white text-[#1e1915] border-[#ffe9a9] hover:bg-[#ffe9a9]/30'
+                            ? 'bg-[#111827] text-white border-[#111827] shadow-xs'
+                            : 'bg-white text-[#111827] border-gray-200 hover:bg-gray-50'
                         }`}
                       >
                         ★ {s}
@@ -207,13 +207,13 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenReader
                 </div>
 
                 {/* Multi-Criteria Ratings */}
-                <div className="grid grid-cols-2 gap-3 bg-[#ffe9a9]/20 p-3.5 rounded-2xl border border-[#ffe9a9]">
+                <div className="grid grid-cols-2 gap-3 bg-gray-50 p-3.5 rounded-xl border border-gray-200">
                   <div>
-                    <label className="block text-[#1e1915] font-semibold mb-1">Content Accuracy</label>
+                    <label className="block text-[#111827] font-semibold mb-1">Content Accuracy</label>
                     <select
                       value={contentAccuracy}
                       onChange={(e) => setContentAccuracy(Number(e.target.value))}
-                      className="w-full p-2 rounded-xl border border-[#ffe9a9] bg-white font-medium text-[#1e1915]"
+                      className="w-full p-2 rounded-lg border border-gray-300 bg-white font-medium text-[#111827] focus:outline-none focus:border-[#D97706]"
                     >
                       {[5, 4, 3, 2, 1].map((n) => (
                         <option key={n} value={n}>{n} Stars</option>
@@ -221,11 +221,11 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenReader
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[#1e1915] font-semibold mb-1">Explanation Quality</label>
+                    <label className="block text-[#111827] font-semibold mb-1">Explanation Quality</label>
                     <select
                       value={explanationQuality}
                       onChange={(e) => setExplanationQuality(Number(e.target.value))}
-                      className="w-full p-2 rounded-xl border border-[#ffe9a9] bg-white font-medium text-[#1e1915]"
+                      className="w-full p-2 rounded-lg border border-gray-300 bg-white font-medium text-[#111827] focus:outline-none focus:border-[#D97706]"
                     >
                       {[5, 4, 3, 2, 1].map((n) => (
                         <option key={n} value={n}>{n} Stars</option>
@@ -233,11 +233,11 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenReader
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[#1e1915] font-semibold mb-1">Readability / Handwriting</label>
+                    <label className="block text-[#111827] font-semibold mb-1">Readability / Handwriting</label>
                     <select
                       value={readability}
                       onChange={(e) => setReadability(Number(e.target.value))}
-                      className="w-full p-2 rounded-xl border border-[#ffe9a9] bg-white font-medium text-[#1e1915]"
+                      className="w-full p-2 rounded-lg border border-gray-300 bg-white font-medium text-[#111827] focus:outline-none focus:border-[#D97706]"
                     >
                       {[5, 4, 3, 2, 1].map((n) => (
                         <option key={n} value={n}>{n} Stars</option>
@@ -245,11 +245,11 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenReader
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[#1e1915] font-semibold mb-1">Exam Usefulness</label>
+                    <label className="block text-[#111827] font-semibold mb-1">Exam Usefulness</label>
                     <select
                       value={examUsefulness}
                       onChange={(e) => setExamUsefulness(Number(e.target.value))}
-                      className="w-full p-2 rounded-xl border border-[#ffe9a9] bg-white font-medium text-[#1e1915]"
+                      className="w-full p-2 rounded-lg border border-gray-300 bg-white font-medium text-[#111827] focus:outline-none focus:border-[#D97706]"
                     >
                       {[5, 4, 3, 2, 1].map((n) => (
                         <option key={n} value={n}>{n} Stars</option>
@@ -259,14 +259,14 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenReader
                 </div>
 
                 <div>
-                  <label className="block font-bold text-[#1e1915] mb-1">Detailed Review</label>
+                  <label className="block font-bold text-[#111827] mb-1">Detailed Review</label>
                   <textarea
                     required
                     rows={3}
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
                     placeholder="How did this document help you prepare for university mid-term or final exams?"
-                    className="w-full p-3 rounded-2xl border border-[#ffe9a9] bg-white focus:outline-none focus:border-[#ea6510] text-[#1e1915] placeholder:text-[#645548]/50"
+                    className="w-full p-3 rounded-xl border border-gray-300 bg-white focus:outline-none focus:border-[#D97706] text-[#111827] placeholder:text-gray-400"
                   />
                 </div>
 
@@ -274,14 +274,14 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenReader
                   <button
                     type="button"
                     onClick={() => setSelectedDocForReview(null)}
-                    className="px-4 py-2 text-[#645548] hover:text-[#1e1915] font-semibold transition-colors"
+                    className="px-4 py-2 text-gray-500 hover:text-[#111827] font-semibold transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={reviewSubmitting}
-                    className="px-5 py-2.5 rounded-xl bg-[#ea6510] hover:bg-[#d45707] text-white font-bold transition-all shadow-xs hover:shadow-md active:scale-95 disabled:opacity-50"
+                    className="px-5 py-2 rounded-xl bg-[#D97706] hover:bg-[#b45309] text-white font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-50"
                   >
                     {reviewSubmitting ? 'Submitting...' : 'Post Verified Review'}
                   </button>

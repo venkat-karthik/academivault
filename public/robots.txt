@@ -30,3 +30,4 @@ User-agent: Bytespider
 Disallow: /
 
 Sitemap: https://academivault.vercel.app/sitemap.xml
+
