@@ -92,6 +92,24 @@ app.use(
 app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());
 
+// Normalize API prefix for serverless environments (handles both /api/* and rewritten /*)
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  if (req.url && !req.url.startsWith('/api') && (
+    req.url.startsWith('/health') ||
+    req.url.startsWith('/auth') ||
+    req.url.startsWith('/sessions') ||
+    req.url.startsWith('/documents') ||
+    req.url.startsWith('/colleges') ||
+    req.url.startsWith('/payments') ||
+    req.url.startsWith('/admin') ||
+    req.url.startsWith('/reader') ||
+    req.url.startsWith('/user')
+  )) {
+    req.url = '/api' + req.url;
+  }
+  next();
+});
+
 // Serverless-safe body parsing: skip if stream already consumed or body already parsed
 app.use((req: Request, res: Response, next: NextFunction) => {
   if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
