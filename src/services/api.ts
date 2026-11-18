@@ -64,8 +64,21 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
   }
 
   if (!response.ok) {
-    const errorJson = await response.json().catch(() => ({}));
-    throw new Error(errorJson.message || errorJson.error || `Request failed with status ${response.status}`);
+    let errorMsg = '';
+    try {
+      const errorJson = await response.json();
+      errorMsg = errorJson.message || errorJson.error || '';
+    } catch {
+      try {
+        const text = await response.text();
+        if (text && text.length < 250 && !text.includes('<!DOCTYPE')) {
+          errorMsg = text;
+        }
+      } catch {
+        // Safe fallback
+      }
+    }
+    throw new Error(errorMsg || `Server responded with status ${response.status}. Please try again.`);
   }
 
   return response.json();

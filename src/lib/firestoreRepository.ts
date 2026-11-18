@@ -211,7 +211,11 @@ export class FirestoreRepository {
       if (isAdmin && user.role !== 'admin') {
         user.role = 'admin';
         if (isFirestoreConfigured && firestoreDb) {
-          await firestoreDb.collection('users').doc(user.id).update({ role: 'admin' });
+          try {
+            await firestoreDb.collection('users').doc(user.id).set({ role: 'admin' }, { merge: true });
+          } catch (err) {
+            console.error('[Firestore] Role update error:', err);
+          }
         }
       }
       return user;
@@ -234,7 +238,7 @@ export class FirestoreRepository {
 
     if (isFirestoreConfigured && firestoreDb) {
       try {
-        await firestoreDb.collection('users').doc(userId).set(newUser);
+        await firestoreDb.collection('users').doc(userId).set(newUser, { merge: true });
       } catch (err) {
         console.error('[Firestore] Google user creation error:', err);
       }
@@ -298,10 +302,10 @@ export class FirestoreRepository {
     if (isFirestoreConfigured && firestoreDb) {
       try {
         await firestoreDb.collection('user_sessions').doc(sessionId).set(newSession);
-        await firestoreDb.collection('users').doc(userId).update({
+        await firestoreDb.collection('users').doc(userId).set({
           activeSessionId: sessionId,
           lastLoginAt: nowIso
-        });
+        }, { merge: true });
       } catch (err) {
         console.error('[Firestore] createSession error:', err);
       }

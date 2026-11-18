@@ -83,8 +83,42 @@ app.use(
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());
-app.use(express.json({ limit: '25mb' }));
-app.use(express.urlencoded({ extended: true, limit: '25mb' }));
+
+// Serverless-safe body parsing: skip if stream already consumed or body already parsed
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+    return next();
+  }
+  express.json({ limit: '25mb' })(req, res, (err) => {
+    if (err) {
+      console.warn('[express.json] parse warning:', err.message);
+      return next();
+    }
+    next();
+  });
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+    return next();
+  }
+  express.urlencoded({ extended: true, limit: '25mb' })(req, res, (err) => {
+    if (err) {
+      console.warn('[express.urlencoded] parse warning:', err.message);
+      return next();
+    }
+    next();
+  });
+});
+
+// Safe IP extractor that functions across Vercel, Cloudflare, and local environments
+const getClientIp = (req: Request): string => {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.socket?.remoteAddress || '127.0.0.1';
+};
 
 // Auth & Payment Rate Limiter with serverless reverse proxy tolerance
 const authLimiter = rateLimit({
@@ -92,7 +126,8 @@ const authLimiter = rateLimit({
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
-  validate: { xForwardedForHeader: false, trustProxy: false },
+  validate: false,
+  keyGenerator: getClientIp,
   message: { error: 'Too many authentication attempts. Please try again after 15 minutes.' }
 });
 
@@ -101,7 +136,8 @@ const paymentLimiter = rateLimit({
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
-  validate: { xForwardedForHeader: false, trustProxy: false },
+  validate: false,
+  keyGenerator: getClientIp,
   message: { error: 'Rate limit exceeded for payment requests. Please try again in 5 minutes.' }
 });
 
@@ -323,35 +359,35 @@ app.post('/api/auth/register', authLimiter, async (req: Request, res: Response) 
 });
 
 app.post('/api/auth/google', authLimiter, async (req: Request, res: Response) => {
-  const { credential, email, name, avatarUrl, deviceLabel } = req.body;
-  const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
-  const userAgent = (req.headers['user-agent'] as string) || 'Unknown Browser';
-  const device = deviceLabel || 'Primary Web Device';
-
-  let targetEmail = email;
-  let targetName = name;
-  let targetAvatar = avatarUrl;
-
-  if (credential) {
-    try {
-      const parts = credential.split('.');
-      if (parts.length === 3) {
-        const payloadJson = Buffer.from(parts[1], 'base64').toString('utf8');
-        const tokenPayload = JSON.parse(payloadJson);
-        targetEmail = tokenPayload.email || targetEmail;
-        targetName = tokenPayload.name || targetName;
-        targetAvatar = tokenPayload.picture || targetAvatar;
-      }
-    } catch (jwtErr) {
-      console.warn('[Google Auth] Failed to parse JWT payload:', jwtErr);
-    }
-  }
-
-  if (!targetEmail) {
-    return res.status(400).json({ error: 'Valid Google email is required.' });
-  }
-
   try {
+    const { credential, email, name, avatarUrl, deviceLabel } = req.body || {};
+    const clientIp = getClientIp(req);
+    const userAgent = (req.headers['user-agent'] as string) || 'Unknown Browser';
+    const device = deviceLabel || 'Primary Web Device';
+
+    let targetEmail = email;
+    let targetName = name;
+    let targetAvatar = avatarUrl;
+
+    if (credential) {
+      try {
+        const parts = credential.split('.');
+        if (parts.length === 3) {
+          const payloadJson = Buffer.from(parts[1], 'base64').toString('utf8');
+          const tokenPayload = JSON.parse(payloadJson);
+          targetEmail = tokenPayload.email || targetEmail;
+          targetName = tokenPayload.name || targetName;
+          targetAvatar = tokenPayload.picture || targetAvatar;
+        }
+      } catch (jwtErr) {
+        console.warn('[Google Auth] Failed to parse JWT payload:', jwtErr);
+      }
+    }
+
+    if (!targetEmail) {
+      return res.status(400).json({ error: 'Valid Google email is required.' });
+    }
+
     const user = await repository.findOrCreateGoogleUser({
       email: targetEmail,
       name: targetName || targetEmail.split('@')[0],
@@ -360,20 +396,27 @@ app.post('/api/auth/google', authLimiter, async (req: Request, res: Response) =>
 
     const session = await repository.createSession(user.id, device, clientIp, userAgent);
 
-    res.cookie('academiasecure_session', session.sessionId, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 30 * 24 * 60 * 60 * 1000
-    });
+    try {
+      res.cookie('academiasecure_session', session.sessionId, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 30 * 24 * 60 * 60 * 1000
+      });
+    } catch (cookieErr) {
+      console.warn('[Google Auth] Cookie setting error:', cookieErr);
+    }
 
     const { passwordHash, ...safeUser } = user;
-    res.json({
+    return res.status(200).json({
       user: safeUser,
       session
     });
   } catch (err: unknown) {
-    res.status(500).json({ error: err instanceof Error ? err.message : 'Google authentication failed' });
+    console.error('[Google Auth Error]:', err);
+    return res.status(500).json({
+      error: err instanceof Error ? err.message : 'Google authentication failed'
+    });
   }
 });
 
@@ -1242,6 +1285,17 @@ app.post('/api/admin/sessions/:sessionId/revoke', requireSession, requireAdmin, 
 
 app.get('/api/admin/security-logs', requireSession, requireAdmin, (_req: AuthenticatedRequest, res: Response) => {
   res.json(repository.getSecurityLogs());
+});
+
+// ==========================================
+// GLOBAL JSON ERROR HANDLER (Prevents HTML 500 on Vercel)
+// ==========================================
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('[AcademiaVault Server Error]:', err);
+  if (res.headersSent) return;
+  res.status(err.status || err.statusCode || 500).json({
+    error: err.message || 'An unexpected server error occurred.'
+  });
 });
 
 // ==========================================
